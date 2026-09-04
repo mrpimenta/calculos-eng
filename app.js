@@ -1,11 +1,14 @@
 const $ = (id) => document.getElementById(id);
 
-const fields = [
-  'valorCorrigido','juros','fgtsCorrigido','fgtsJuros','liquidoOriginal',
-  'brutoPagina','fgtsPagina','honorarios','multas','taxaAnual'
+const requiredIds = [
+  'valorCorrigido',
+  'juros',
+  'fgtsCorrigido',
+  'fgtsJuros',
+  'liquidoOriginal'
 ];
 
-const requiredIds = ['valorCorrigido','juros','fgtsCorrigido','fgtsJuros','liquidoOriginal'];
+const fields = [...requiredIds, 'taxaAnual'];
 
 function parseBR(value) {
   if (typeof value !== 'string') return Number(value) || 0;
@@ -17,7 +20,10 @@ function parseBR(value) {
 }
 
 function fmt(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value || 0);
 }
 
 function fmtInput(value) {
@@ -28,13 +34,20 @@ function fmtInput(value) {
 }
 
 function pct(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'percent',
+    maximumFractionDigits: 0
+  }).format(value);
 }
 
-function getRule(n) {
-  if (n === 1) return { rate: 0.70, label: 'À vista · 70% de deságio sobre juros e multas' };
-  if (n <= 12) return { rate: 0.50, label: `${n}x · 50% de deságio sobre juros e multas` };
-  return { rate: 0.30, label: `${n}x · 30% de deságio sobre juros e multas` };
+function getRule(parcelas) {
+  if (parcelas === 1) {
+    return { rate: 0.70, label: 'À vista · 70% de deságio sobre juros' };
+  }
+  if (parcelas <= 12) {
+    return { rate: 0.50, label: `${parcelas}x · 50% de deságio sobre juros` };
+  }
+  return { rate: 0.30, label: `${parcelas}x · 30% de deságio sobre juros` };
 }
 
 function inputs() {
@@ -44,17 +57,13 @@ function inputs() {
     fgtsCorrigido: parseBR($('fgtsCorrigido').value),
     fgtsJuros: parseBR($('fgtsJuros').value),
     liquidoOriginal: parseBR($('liquidoOriginal').value),
-    brutoPagina: parseBR($('brutoPagina').value),
-    fgtsPagina: parseBR($('fgtsPagina').value),
-    honorarios: parseBR($('honorarios').value),
-    multas: parseBR($('multas').value),
     taxaAnual: parseBR($('taxaAnual').value) / 100,
     parcelas: Number($('parcelas').value || 1)
   };
 }
 
 function requiredFilledCount() {
-  return requiredIds.filter(id => $(id).value.trim() !== '').length;
+  return requiredIds.filter((id) => $(id).value.trim() !== '').length;
 }
 
 function isComplete() {
@@ -63,27 +72,27 @@ function isComplete() {
 
 function simulate(base, parcelas) {
   const rule = getRule(parcelas);
-
   const jurosDiretos = Math.max(0, base.juros - base.fgtsJuros);
-  const baseDiretaDesagio = jurosDiretos + base.multas;
-  const desagioDireto = baseDiretaDesagio * rule.rate;
-
+  const desagioDireto = jurosDiretos * rule.rate;
   const desagioFGTS = base.fgtsJuros * rule.rate;
   const desagioTotal = desagioDireto + desagioFGTS;
 
+  const brutoOriginal = base.valorCorrigido + base.juros;
+  const brutoAcordo = Math.max(0, brutoOriginal - desagioTotal);
   const liquidoDireto = Math.max(0, base.liquidoOriginal - desagioDireto);
-  const fgtsFinal = Math.max(0, base.fgtsCorrigido + base.fgtsJuros - desagioFGTS);
+  const fgtsOriginal = base.fgtsCorrigido + base.fgtsJuros;
+  const fgtsFinal = Math.max(0, fgtsOriginal - desagioFGTS);
   const totalEconomico = liquidoDireto + fgtsFinal;
+  const parcelaMedia = parcelas > 0 ? liquidoDireto / parcelas : 0;
 
-  const brutoOriginalCalculado = base.valorCorrigido + base.juros + base.multas;
-  const brutoAcordo = Math.max(0, brutoOriginalCalculado - desagioTotal);
-  const parcelaMedia = liquidoDireto / parcelas;
+  const taxaMensal = base.taxaAnual > -1
+    ? Math.pow(1 + base.taxaAnual, 1 / 12) - 1
+    : 0;
 
-  const taxaMensal = base.taxaAnual > -1 ? Math.pow(1 + base.taxaAnual, 1 / 12) - 1 : 0;
   let valorPresente = liquidoDireto;
   if (parcelas > 1 && taxaMensal > 0) {
     valorPresente = 0;
-    for (let i = 1; i <= parcelas; i++) {
+    for (let i = 1; i <= parcelas; i += 1) {
       valorPresente += parcelaMedia / Math.pow(1 + taxaMensal, i);
     }
   }
@@ -92,22 +101,19 @@ function simulate(base, parcelas) {
     parcelas,
     ...rule,
     jurosDiretos,
-    baseDiretaDesagio,
     desagioDireto,
     desagioFGTS,
     desagioTotal,
+    brutoOriginal,
+    brutoAcordo,
     liquidoDireto,
+    fgtsOriginal,
     fgtsFinal,
     totalEconomico,
-    brutoOriginalCalculado,
-    brutoAcordo,
     parcelaMedia,
-    valorPresente
+    valorPresente,
+    directReduction: Math.max(0, base.liquidoOriginal - liquidoDireto)
   };
-}
-
-function difference(a, b) {
-  return Math.abs(a - b);
 }
 
 function renderProgress() {
@@ -120,50 +126,50 @@ function renderValidation(base) {
   if (!isComplete()) {
     const missing = requiredIds.length - requiredFilledCount();
     box.className = 'validation validation--neutral';
-    box.innerHTML = `<strong>Faltam ${missing} ${missing === 1 ? 'dado essencial' : 'dados essenciais'}.</strong> Continue copiando a primeira página do cálculo.`;
+    box.innerHTML = `<strong>Faltam ${missing} ${missing === 1 ? 'campo' : 'campos'}.</strong> Copie somente os valores indicados na página 1 do cálculo.`;
     return;
   }
 
-  const checks = [];
+  const warnings = [];
   if (base.fgtsJuros > base.juros) {
-    checks.push('⚠ Os juros do FGTS não podem ser maiores que os juros totais.');
+    warnings.push('Os juros do FGTS estão maiores que os juros totais. Confira os dois campos.');
+  }
+  if (base.fgtsCorrigido > base.valorCorrigido) {
+    warnings.push('O valor corrigido do FGTS está maior que o valor corrigido total. Confira a digitação.');
   }
 
-  if (base.brutoPagina > 0) {
-    const expected = base.valorCorrigido + base.juros;
-    const diff = difference(expected, base.brutoPagina);
-    const ok = diff <= 0.05;
-    checks.push(`${ok ? '✓' : '⚠'} Bruto: ${ok ? 'confere' : `diferença de ${fmt(diff)}`}`);
-  }
-
-  if (base.fgtsPagina > 0) {
-    const expected = base.fgtsCorrigido + base.fgtsJuros;
-    const diff = difference(expected, base.fgtsPagina);
-    const ok = diff <= 0.05;
-    checks.push(`${ok ? '✓' : '⚠'} FGTS: ${ok ? 'confere' : `diferença de ${fmt(diff)}`}`);
-  }
-
-  if (!checks.length) {
-    box.className = 'validation validation--success';
-    box.innerHTML = '<strong>Dados essenciais completos.</strong> A comparação de cenários está pronta. Você pode preencher as conferências opcionais para validar a digitação.';
+  if (warnings.length) {
+    box.className = 'validation validation--warning';
+    box.innerHTML = `<strong>Confira antes de usar a simulação.</strong> ${warnings.join(' ')}`;
     return;
   }
 
-  const hasWarning = checks.some(x => x.startsWith('⚠'));
-  box.className = `validation validation--${hasWarning ? 'warning' : 'success'}`;
-  box.innerHTML = `<strong>Conferência automática:</strong> ${checks.join(' · ')}`;
+  box.className = 'validation validation--success';
+  box.innerHTML = '<strong>Dados completos.</strong> A comparação de cenários foi atualizada automaticamente.';
 }
 
 function clearResults() {
-  ['liquido','parcelaMedia','fgtsFinal','desagio','totalEconomico','valorPresente','originalValue','directReduction']
-    .forEach(id => $(id).textContent = '—');
+  [
+    'liquido',
+    'parcelaMedia',
+    'fgtsFinal',
+    'desagio',
+    'directReduction',
+    'brutoAcordo',
+    'totalEconomico',
+    'valorPresente'
+  ].forEach((id) => { $(id).textContent = '—'; });
 
-  $('compareBody').innerHTML = '<tr><td colspan="7" class="empty-row">Preencha os dados essenciais para comparar as modalidades.</td></tr>';
-  $('memory').innerHTML = '<div class="memory-item"><span>Memória de cálculo</span><strong>Complete os dados essenciais para gerar a memória.</strong></div>';
+  $('originalValue').textContent = $('liquidoOriginal').value.trim()
+    ? fmt(parseBR($('liquidoOriginal').value))
+    : '—';
+
+  $('compareBody').innerHTML = '<tr><td colspan="7" class="empty-row">Preencha os cinco valores para comparar as modalidades.</td></tr>';
+  $('memory').innerHTML = '';
 }
 
 function renderScenarioButtons(parcelas) {
-  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach(button => {
+  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach((button) => {
     const active = Number(button.dataset.parcelas) === parcelas;
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
@@ -171,54 +177,59 @@ function renderScenarioButtons(parcelas) {
 
 function render() {
   const base = inputs();
-  const r = simulate(base, base.parcelas);
-
   renderProgress();
   renderValidation(base);
   renderScenarioButtons(base.parcelas);
-  $('ruleBadge').textContent = r.label;
 
   if (!isComplete()) {
+    $('ruleBadge').textContent = 'Aguardando preenchimento';
     clearResults();
     return;
   }
 
-  $('liquido').textContent = fmt(r.liquidoDireto);
-  $('parcelaMedia').textContent = fmt(r.parcelaMedia);
-  $('fgtsFinal').textContent = fmt(r.fgtsFinal);
-  $('desagio').textContent = fmt(r.desagioTotal);
-  $('totalEconomico').textContent = fmt(r.totalEconomico);
-  $('valorPresente').textContent = fmt(r.valorPresente);
+  const result = simulate(base, base.parcelas);
+  $('ruleBadge').textContent = result.label;
+  $('liquido').textContent = fmt(result.liquidoDireto);
   $('originalValue').textContent = fmt(base.liquidoOriginal);
-  $('directReduction').textContent = fmt(r.desagioDireto);
+  $('parcelaMedia').textContent = fmt(result.parcelaMedia);
+  $('fgtsFinal').textContent = fmt(result.fgtsFinal);
+  $('desagio').textContent = fmt(result.desagioTotal);
+  $('directReduction').textContent = fmt(result.directReduction);
+  $('brutoAcordo').textContent = fmt(result.brutoAcordo);
+  $('totalEconomico').textContent = fmt(result.totalEconomico);
+  $('valorPresente').textContent = fmt(result.valorPresente);
 
-  const options = [...new Set([1, 12, 13, 14, 24, base.parcelas])].sort((a,b)=>a-b);
-  $('compareBody').innerHTML = options.map(n => {
-    const x = simulate(base, n);
+  const options = [...new Set([1, 12, 13, 14, 24, base.parcelas])]
+    .sort((a, b) => a - b);
+
+  $('compareBody').innerHTML = options.map((n) => {
+    const scenario = simulate(base, n);
     return `<tr class="${n === base.parcelas ? 'active' : ''}">
       <td>${n === 1 ? 'À vista' : `${n} parcelas`}</td>
-      <td>${pct(x.rate)}</td>
-      <td>${fmt(x.liquidoDireto)}</td>
-      <td>${fmt(x.parcelaMedia)}</td>
-      <td>${fmt(x.fgtsFinal)}</td>
-      <td>${fmt(x.totalEconomico)}</td>
-      <td>${fmt(x.valorPresente)}</td>
+      <td>${pct(scenario.rate)}</td>
+      <td>${fmt(scenario.liquidoDireto)}</td>
+      <td>${fmt(scenario.parcelaMedia)}</td>
+      <td>${fmt(scenario.fgtsFinal)}</td>
+      <td>${fmt(scenario.brutoAcordo)}</td>
+      <td>${fmt(scenario.valorPresente)}</td>
     </tr>`;
   }).join('');
 
   const items = [
-    ['Líquido original informado', base.liquidoOriginal],
-    ['Juros totais da 1ª tabela', base.juros],
-    ['Juros do FGTS', base.fgtsJuros],
-    ['Juros ligados ao pagamento direto', r.jurosDiretos],
-    ['Multas sujeitas a deságio', base.multas],
-    [`Deságio no pagamento direto (${pct(r.rate)})`, r.desagioDireto],
-    [`Deságio no FGTS (${pct(r.rate)})`, r.desagioFGTS],
-    ['Deságio total', r.desagioTotal],
-    ['Total direto após deságio', r.liquidoDireto],
-    ['FGTS após deságio', r.fgtsFinal],
-    ['Total econômico (direto + FGTS)', r.totalEconomico],
-    ['Honorários informados (informativo)', base.honorarios]
+    ['“Total” → Valor Corrigido', base.valorCorrigido],
+    ['“Total” → Juros', base.juros],
+    ['“FGTS 8%” → Valor Corrigido', base.fgtsCorrigido],
+    ['“FGTS 8%” → Juros', base.fgtsJuros],
+    ['Líquido Devido ao Reclamante', base.liquidoOriginal],
+    ['Juros ligados ao pagamento direto', result.jurosDiretos],
+    [`Deságio no pagamento direto (${pct(result.rate)})`, result.desagioDireto],
+    [`Deságio no FGTS (${pct(result.rate)})`, result.desagioFGTS],
+    ['Deságio total', result.desagioTotal],
+    ['Bruto original do crédito', result.brutoOriginal],
+    ['Bruto do crédito após deságio', result.brutoAcordo],
+    ['Recebimento direto estimado', result.liquidoDireto],
+    ['FGTS após deságio', result.fgtsFinal],
+    ['Total econômico (direto + FGTS)', result.totalEconomico]
   ];
 
   $('memory').innerHTML = items
@@ -227,24 +238,23 @@ function render() {
 }
 
 function initParcelas() {
-  $('parcelas').innerHTML = Array.from({length: 24}, (_,i) => i + 1)
-    .map(n => `<option value="${n}" ${n===12?'selected':''}>${n === 1 ? '1 — à vista' : `${n} parcelas`}</option>`)
+  $('parcelas').innerHTML = Array.from({ length: 24 }, (_, i) => i + 1)
+    .map((n) => `<option value="${n}" ${n === 12 ? 'selected' : ''}>${n === 1 ? '1 — à vista' : `${n} parcelas`}</option>`)
     .join('');
 }
 
 function initMoneyFormatting() {
-  document.querySelectorAll('[data-money]').forEach(input => {
+  document.querySelectorAll('[data-money]').forEach((input) => {
     input.addEventListener('blur', () => {
       if (!input.value.trim()) return;
-      const value = parseBR(input.value);
-      input.value = fmtInput(value);
+      input.value = fmtInput(parseBR(input.value));
       render();
     });
   });
 }
 
 function initQuickScenarios() {
-  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach(button => {
+  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach((button) => {
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('click', () => {
       $('parcelas').value = button.dataset.parcelas;
@@ -256,7 +266,7 @@ function initQuickScenarios() {
 initParcelas();
 initMoneyFormatting();
 initQuickScenarios();
-fields.forEach(id => $(id).addEventListener('input', render));
+fields.forEach((id) => $(id).addEventListener('input', render));
 $('parcelas').addEventListener('change', render);
 $('printBtn').addEventListener('click', () => window.print());
 render();
