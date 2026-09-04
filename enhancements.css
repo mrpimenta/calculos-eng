@@ -56,6 +56,64 @@
   align-self: center;
 }
 
+.company-discount-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 280px);
+  gap: 24px;
+  align-items: center;
+  margin-top: 18px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.company-discount-summary__copy > strong {
+  display: block;
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.company-discount-summary__copy > small {
+  display: block;
+  max-width: 620px;
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.company-discount-summary__value {
+  text-align: right;
+}
+
+.company-discount-summary__value > strong,
+.company-discount-summary__value > span,
+.company-discount-summary__value > small {
+  display: block;
+}
+
+.company-discount-summary__value > strong {
+  color: var(--navy);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.company-discount-summary__value > span {
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: .82rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.company-discount-summary__value > small {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
 .result-main__comparison--secondary {
   margin-top: 8px;
   padding-top: 8px;
@@ -202,8 +260,13 @@ td:not(:first-child),
 
   .condition-grid,
   .lawyer-fee,
+  .company-discount-summary,
   .rule-strip {
     grid-template-columns: 1fr;
+  }
+
+  .company-discount-summary__value {
+    text-align: left;
   }
 
   .rule-strip > div {
