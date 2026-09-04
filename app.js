@@ -125,26 +125,8 @@ function initParcelas() {
     .map(n => `<option value="${n}" ${n===12?'selected':''}>${n === 1 ? '1 — à vista' : `${n} parcelas`}</option>`).join('');
 }
 
-function setExample() {
-  // Totais da página 1 do cálculo Blanco de 31/08/2026.
-  const example = {
-    valorCorrigido: '661.947,56',
-    juros: '433.367,82',
-    multas: '0,00',
-    fgtsCorrigido: '43.681,99',
-    fgtsJuros: '28.573,27',
-    irpf: '13.512,69',
-    outrosDescontos: '0,00',
-    honorarios: '164.297,31',
-    taxaAnual: '15,00'
-  };
-  Object.entries(example).forEach(([id, value]) => $(id).value = value);
-  render();
-}
-
 initParcelas();
 fields.forEach(id => $(id).addEventListener('input', render));
 $('parcelas').addEventListener('change', render);
-$('fillBruno').addEventListener('click', setExample);
 $('printBtn').addEventListener('click', () => window.print());
-setExample();
+render();
