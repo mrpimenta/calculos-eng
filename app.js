@@ -80,6 +80,8 @@ function simulate(base, parcelas) {
 
   const brutoOriginal = base.valorCorrigido + base.juros;
   const brutoAcordo = Math.max(0, brutoOriginal - desagioTotal);
+  const desagioGlobalPct = brutoOriginal > 0 ? desagioTotal / brutoOriginal : 0;
+  const empresaPagaPct = brutoOriginal > 0 ? brutoAcordo / brutoOriginal : 0;
 
   const liquidoAntesAdvogado = Math.max(0, base.liquidoOriginal - desagioDireto);
   const honorariosAdvogado = liquidoAntesAdvogado * base.advogadoPct;
@@ -111,6 +113,8 @@ function simulate(base, parcelas) {
     desagioTotal,
     brutoOriginal,
     brutoAcordo,
+    desagioGlobalPct,
+    empresaPagaPct,
     liquidoAntesAdvogado,
     honorariosAdvogado,
     liquidoFinal,
@@ -167,7 +171,10 @@ function clearResults() {
     'desagio',
     'brutoAcordo',
     'totalEconomico',
-    'valorPresente'
+    'valorPresente',
+    'globalDiscountPct',
+    'globalDiscountAmount',
+    'companyPaidPct'
   ].forEach((id) => { $(id).textContent = '—'; });
 
   $('originalValue').textContent = $('liquidoOriginal').value.trim()
@@ -209,6 +216,9 @@ function render() {
   $('brutoAcordo').textContent = fmt(result.brutoAcordo);
   $('totalEconomico').textContent = fmt(result.totalEconomico);
   $('valorPresente').textContent = fmt(result.valorPresente);
+  $('globalDiscountPct').textContent = pct(result.desagioGlobalPct);
+  $('globalDiscountAmount').textContent = `${fmt(result.desagioTotal)} de redução`;
+  $('companyPaidPct').textContent = `A APS paga aproximadamente ${pct(result.empresaPagaPct)} do crédito bruto antes do advogado.`;
 
   const options = [...new Set([1, 12, 13, 14, 24, base.parcelas])]
     .sort((a, b) => a - b);
