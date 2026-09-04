@@ -3,180 +3,277 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simulador de Acordo APS</title>
-  <meta name="description" content="Simulador de deságio e parcelamento para acordos APS a partir da primeira página do cálculo judicial." />
+  <title>Cálculos Eng · Simulador de Acordo APS</title>
+  <meta name="description" content="Simulador de deságio e parcelamento para acordos APS a partir da primeira página do cálculo Blanco." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="container">
-      <div class="eyebrow">Processo dos Engenheiros · Simulador</div>
-      <h1>Simulador de Acordo APS</h1>
-      <p>Copie os valores diretamente da primeira página do seu cálculo Blanco e compare quanto receberia em cada modalidade de acordo.</p>
-      <div class="badges">
-        <span>1x: 70% de deságio</span>
-        <span>2–12x: 50%</span>
-        <span>13–24x: 30%</span>
+  <header class="app-header">
+    <div class="app-header__bar"></div>
+    <div class="shell app-header__inner">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">CE</div>
+        <div>
+          <strong>Cálculos Eng</strong>
+          <span>Simulador de Acordo APS</span>
+        </div>
+      </div>
+      <div class="trust-line" aria-label="Informações de privacidade e processamento">
+        <span>Processamento local</span>
+        <span>Nenhum dado é enviado</span>
       </div>
     </div>
   </header>
 
-  <main class="container grid-main">
-    <section class="card form-card">
-      <div class="section-title">
-        <div>
-          <p class="kicker">Entradas</p>
-          <h2>Copie da 1ª página do cálculo</h2>
-        </div>
+  <main class="shell page">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Liquidação trabalhista · apoio à decisão</p>
+        <h1 id="page-title">Copie a 1ª página do Blanco.<br />Compare o acordo.</h1>
       </div>
-
-      <div class="source-guide">
-        <strong>Use os nomes exatamente como aparecem no Blanco.</strong>
-        <span>Os cinco campos marcados como necessários bastam para calcular o valor direto, o FGTS e as parcelas. Os campos de conferência são opcionais.</span>
-      </div>
-
-      <div class="input-group">
-        <div class="group-heading">
-          <div>
-            <p class="kicker">Tabela 1</p>
-            <h3>Resumo do Cálculo</h3>
-          </div>
-          <span class="source-chip">linha “Total” + linha “FGTS 8%”</span>
-        </div>
-
-        <div class="form-grid">
-          <label>
-            <span>Total — Valor Corrigido <b class="required">necessário</b></span>
-            <input id="valorCorrigido" inputmode="decimal" placeholder="Copie a coluna Valor Corrigido da linha Total" />
-            <small>Primeira tabela, última linha (“Total”), coluna “Valor Corrigido”.</small>
-          </label>
-          <label>
-            <span>Total — Juros <b class="required">necessário</b></span>
-            <input id="juros" inputmode="decimal" placeholder="Copie a coluna Juros da linha Total" />
-            <small>Primeira tabela, última linha (“Total”), coluna “Juros”.</small>
-          </label>
-          <label>
-            <span>FGTS 8% — Valor Corrigido <b class="required">necessário</b></span>
-            <input id="fgtsCorrigido" inputmode="decimal" placeholder="Copie o Valor Corrigido da linha FGTS 8%" />
-            <small>Linha “FGTS 8%”, coluna “Valor Corrigido”.</small>
-          </label>
-          <label>
-            <span>FGTS 8% — Juros <b class="required">necessário</b></span>
-            <input id="fgtsJuros" inputmode="decimal" placeholder="Copie os Juros da linha FGTS 8%" />
-            <small>Linha “FGTS 8%”, coluna “Juros”.</small>
-          </label>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <div class="group-heading">
-          <div>
-            <p class="kicker">Tabela 2</p>
-            <h3>Créditos e Descontos do Reclamante</h3>
-          </div>
-          <span class="source-chip">valor líquido</span>
-        </div>
-
-        <div class="form-grid">
-          <label>
-            <span>Líquido Devido ao Reclamante <b class="required">necessário</b></span>
-            <input id="liquidoOriginal" inputmode="decimal" placeholder="Copie o Líquido Devido ao Reclamante" />
-            <small>Use o valor final da tabela “Descrição de Créditos e Descontos do Reclamante”.</small>
-          </label>
-          <label>
-            <span>Bruto Devido ao Reclamante <b class="optional">conferência</b></span>
-            <input id="brutoPagina" inputmode="decimal" placeholder="Opcional" />
-            <small>Serve apenas para conferir se Valor Corrigido + Juros foi digitado corretamente.</small>
-          </label>
-          <label>
-            <span>FGTS <b class="optional">conferência</b></span>
-            <input id="fgtsPagina" inputmode="decimal" placeholder="Opcional" />
-            <small>Valor “FGTS” da tabela. Deve coincidir com FGTS corrigido + juros.</small>
-          </label>
-          <label>
-            <span>Honorários líquidos dos patronos <b class="optional">opcional</b></span>
-            <input id="honorarios" inputmode="decimal" placeholder="Opcional" />
-            <small>Informativo. Não é subtraído do valor recebido pelo reclamante.</small>
-          </label>
-        </div>
-      </div>
-
-      <details class="advanced">
-        <summary>Campo adicional, somente se o cálculo tiver multa sujeita ao deságio</summary>
-        <label>
-          <span>Multas sujeitas ao deságio</span>
-          <input id="multas" inputmode="decimal" placeholder="0,00" />
-          <small>No cálculo usado como modelo não há multa destacada na primeira página. Deixe em branco se não houver.</small>
-        </label>
-      </details>
-
-      <div class="divider"></div>
-
-      <div class="form-grid compact">
-        <label>
-          <span>Número de parcelas</span>
-          <select id="parcelas"></select>
-        </label>
-        <label>
-          <span>Taxa anual para comparar valor presente</span>
-          <input id="taxaAnual" inputmode="decimal" value="15,00" />
-          <small>Opcional. Altere para a taxa que quiser usar como referência financeira.</small>
-        </label>
-      </div>
-
-      <div id="validation" class="validation-box neutral">
-        Preencha os valores da primeira página para iniciar a conferência automática.
-      </div>
-
-      <div class="notice">
-        O simulador parte do “Líquido Devido ao Reclamante” já calculado pelo Blanco e reduz apenas a parcela dos juros/multas atingida pelo deságio. Assim, os descontos tributários já existentes na página 1 são preservados como referência e não são recalculados.
-      </div>
+      <p class="intro__copy">O formulário segue a ordem da primeira página do cálculo. Você informa os totais, escolhe o número de parcelas e o sistema aplica a faixa de deságio da política da APS.</p>
     </section>
 
-    <aside class="card result-card">
-      <p class="kicker">Quanto você recebe</p>
-      <div id="ruleBadge" class="rule-badge">—</div>
-      <div class="metric primary">
-        <span>Total direto estimado</span>
-        <strong id="liquido">R$ 0,00</strong>
-      </div>
-      <div class="metric">
-        <span>Valor médio por parcela</span>
-        <strong id="parcelaMedia">R$ 0,00</strong>
-      </div>
-      <div class="metric-row">
-        <div class="metric mini">
-          <span>FGTS separado</span>
-          <strong id="fgtsFinal">R$ 0,00</strong>
+    <div class="workspace">
+      <section class="worksheet" aria-labelledby="worksheet-title">
+        <div class="worksheet__header">
+          <div>
+            <p class="eyebrow">Entrada de dados</p>
+            <h2 id="worksheet-title">Dados da primeira página</h2>
+          </div>
+          <div class="completion" aria-live="polite">
+            <span id="requiredProgress">0/5</span>
+            <small>essenciais preenchidos</small>
+          </div>
         </div>
-        <div class="metric mini">
-          <span>Deságio total</span>
-          <strong id="desagio">R$ 0,00</strong>
-        </div>
-      </div>
-      <div class="metric">
-        <span>Total econômico (direto + FGTS)</span>
-        <strong id="totalEconomico">R$ 0,00</strong>
-      </div>
-      <div class="metric">
-        <span>Crédito bruto após deságio</span>
-        <strong id="brutoAcordo">R$ 0,00</strong>
-      </div>
-      <div class="metric">
-        <span>Valor presente do recebimento direto</span>
-        <strong id="valorPresente">R$ 0,00</strong>
-      </div>
-      <button id="printBtn" class="btn primary" type="button">Imprimir resumo</button>
-    </aside>
 
-    <section class="card compare-card full-width">
-      <div class="section-title">
-        <div>
-          <p class="kicker">Comparação</p>
-          <h2>Modalidades lado a lado</h2>
+        <div class="source-note">
+          <span class="source-note__rule" aria-hidden="true"></span>
+          <div>
+            <strong>Use os valores exatamente como aparecem no cálculo.</strong>
+            <p>Os campos essenciais ficam sinalizados abaixo. Os campos de conferência são opcionais e ajudam a detectar erro de digitação.</p>
+          </div>
         </div>
+
+        <section class="sheet-section" aria-labelledby="resumo-title">
+          <div class="sheet-section__heading">
+            <div class="step-index" aria-hidden="true">01</div>
+            <div>
+              <p class="section-source">Tabela “Resumo do Cálculo”</p>
+              <h3 id="resumo-title">Linha Total e FGTS 8%</h3>
+            </div>
+          </div>
+
+          <div class="field-list">
+            <label class="field-row" for="valorCorrigido">
+              <span class="field-row__text">
+                <strong>Total — Valor Corrigido</strong>
+                <small>Linha “Total” · coluna “Valor Corrigido”</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="valorCorrigido" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row" for="juros">
+              <span class="field-row__text">
+                <strong>Total — Juros</strong>
+                <small>Linha “Total” · coluna “Juros”</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="juros" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row" for="fgtsCorrigido">
+              <span class="field-row__text">
+                <strong>FGTS 8% — Valor Corrigido</strong>
+                <small>Linha “FGTS 8%” · coluna “Valor Corrigido”</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="fgtsCorrigido" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row" for="fgtsJuros">
+              <span class="field-row__text">
+                <strong>FGTS 8% — Juros</strong>
+                <small>Linha “FGTS 8%” · coluna “Juros”</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="fgtsJuros" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="sheet-section" aria-labelledby="creditos-title">
+          <div class="sheet-section__heading">
+            <div class="step-index" aria-hidden="true">02</div>
+            <div>
+              <p class="section-source">Tabela “Créditos e Descontos do Reclamante”</p>
+              <h3 id="creditos-title">Valor líquido e conferências</h3>
+            </div>
+          </div>
+
+          <div class="field-list">
+            <label class="field-row field-row--essential" for="liquidoOriginal">
+              <span class="field-row__text">
+                <strong>Líquido Devido ao Reclamante</strong>
+                <small>Valor final da tabela de créditos e descontos</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="liquidoOriginal" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row field-row--optional" for="brutoPagina">
+              <span class="field-row__text">
+                <strong>Bruto Devido ao Reclamante <em>conferência</em></strong>
+                <small>Opcional · usado para validar Valor Corrigido + Juros</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="brutoPagina" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row field-row--optional" for="fgtsPagina">
+              <span class="field-row__text">
+                <strong>FGTS <em>conferência</em></strong>
+                <small>Opcional · deve coincidir com FGTS corrigido + juros</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="fgtsPagina" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+
+            <label class="field-row field-row--optional" for="honorarios">
+              <span class="field-row__text">
+                <strong>Honorários líquidos dos patronos <em>opcional</em></strong>
+                <small>Informativo · não reduz o valor direto do reclamante</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="honorarios" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+          </div>
+        </section>
+
+        <section class="sheet-section sheet-section--conditions" aria-labelledby="condicoes-title">
+          <div class="sheet-section__heading">
+            <div class="step-index" aria-hidden="true">03</div>
+            <div>
+              <p class="section-source">Condições do acordo</p>
+              <h3 id="condicoes-title">Parcelamento e valor presente</h3>
+            </div>
+          </div>
+
+          <div class="condition-grid">
+            <div>
+              <label class="control-label" for="parcelas">Número de parcelas</label>
+              <select id="parcelas"></select>
+              <div id="scenarioQuick" class="quick-scenarios" aria-label="Atalhos de parcelamento">
+                <button type="button" data-parcelas="1">À vista</button>
+                <button type="button" data-parcelas="12">12x</button>
+                <button type="button" data-parcelas="14">14x</button>
+                <button type="button" data-parcelas="24">24x</button>
+              </div>
+            </div>
+            <div>
+              <label class="control-label" for="taxaAnual">Taxa anual de referência</label>
+              <div class="percent-input">
+                <input id="taxaAnual" inputmode="decimal" value="15,00" />
+                <span>% a.a.</span>
+              </div>
+              <small class="control-help">Usada somente para comparar o valor presente das modalidades.</small>
+            </div>
+          </div>
+
+          <details class="advanced">
+            <summary>O cálculo tem multa sujeita a deságio?</summary>
+            <label class="advanced__field" for="multas">
+              <span>
+                <strong>Multas sujeitas ao deságio</strong>
+                <small>Se não houver valor destacado na página, deixe em branco.</small>
+              </span>
+              <span class="money-input">
+                <span>R$</span>
+                <input id="multas" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
+              </span>
+            </label>
+          </details>
+        </section>
+
+        <div id="validation" class="validation validation--neutral" role="status" aria-live="polite">
+          Preencha os cinco dados essenciais para iniciar a conferência automática.
+        </div>
+      </section>
+
+      <aside class="result-panel" aria-labelledby="result-title">
+        <div class="result-panel__topline">
+          <p class="result-kicker">Cenário selecionado</p>
+          <span id="ruleBadge" class="rule-badge">—</span>
+        </div>
+
+        <div class="result-main">
+          <span id="result-title">Recebimento direto estimado</span>
+          <strong id="liquido">—</strong>
+          <div class="result-main__comparison">
+            <span>Original Blanco</span>
+            <b id="originalValue">—</b>
+          </div>
+        </div>
+
+        <div class="result-ledger">
+          <div>
+            <span>Parcela média</span>
+            <strong id="parcelaMedia">—</strong>
+          </div>
+          <div>
+            <span>FGTS separado</span>
+            <strong id="fgtsFinal">—</strong>
+          </div>
+          <div>
+            <span>Deságio total</span>
+            <strong id="desagio">—</strong>
+          </div>
+          <div>
+            <span>Redução no líquido direto</span>
+            <strong id="directReduction">—</strong>
+          </div>
+          <div class="result-ledger__wide">
+            <span>Total econômico · direto + FGTS</span>
+            <strong id="totalEconomico">—</strong>
+          </div>
+          <div class="result-ledger__wide result-ledger__muted">
+            <span>Valor presente do recebimento direto</span>
+            <strong id="valorPresente">—</strong>
+          </div>
+        </div>
+
+        <button id="printBtn" class="print-button" type="button">Imprimir resumo</button>
+        <p class="result-disclaimer">Simulação indicativa. O valor efetivo depende do termo, atualização, homologação e tratamento tributário/previdenciário aplicável.</p>
+      </aside>
+    </div>
+
+    <section class="comparison" aria-labelledby="comparison-title">
+      <div class="section-headline">
+        <div>
+          <p class="eyebrow">Comparação de cenários</p>
+          <h2 id="comparison-title">O efeito da faixa de deságio em cada modalidade</h2>
+        </div>
+        <p>Compare o valor direto, o FGTS e o valor presente sem alterar os dados da primeira página.</p>
       </div>
-      <div class="table-wrap">
+
+      <div class="table-shell">
         <table>
           <thead>
             <tr>
@@ -189,28 +286,28 @@
               <th>Valor presente</th>
             </tr>
           </thead>
-          <tbody id="compareBody"></tbody>
+          <tbody id="compareBody">
+            <tr><td colspan="7" class="empty-row">Preencha os dados essenciais para comparar as modalidades.</td></tr>
+          </tbody>
         </table>
       </div>
     </section>
 
-    <section class="card memory-card full-width">
-      <div class="section-title">
-        <div>
-          <p class="kicker">Memória de cálculo</p>
-          <h2>Como o resultado foi formado</h2>
-        </div>
-      </div>
+    <details class="calculation-memory">
+      <summary>
+        <span>
+          <small>Transparência do cálculo</small>
+          <strong>Ver memória de cálculo</strong>
+        </span>
+        <span aria-hidden="true">+</span>
+      </summary>
       <div id="memory" class="memory-grid"></div>
-      <div class="legal-note">
-        <strong>Observação:</strong> ferramenta de simulação. O valor efetivamente negociado pode depender da redação do termo, atualização até a data de pagamento, homologação e tratamento tributário/previdenciário aplicável.
-      </div>
-    </section>
+    </details>
   </main>
 
-  <footer class="container footer">
-    <span>Simulador APS · cálculos processados no navegador</span>
-    <span>Sem envio de dados</span>
+  <footer class="footer shell">
+    <span>Cálculos Eng · Simulador de Acordo APS</span>
+    <span>Os dados permanecem no seu navegador.</span>
   </footer>
 
   <script src="app.js"></script>
