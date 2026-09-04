@@ -8,7 +8,7 @@ const requiredIds = [
   'liquidoOriginal'
 ];
 
-const fields = [...requiredIds, 'taxaAnual'];
+const fields = [...requiredIds, 'taxaAnual', 'advogadoPct'];
 
 function parseBR(value) {
   if (typeof value !== 'string') return Number(value) || 0;
@@ -36,7 +36,7 @@ function fmtInput(value) {
 function pct(value) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'percent',
-    maximumFractionDigits: 0
+    maximumFractionDigits: 2
   }).format(value);
 }
 
@@ -58,6 +58,7 @@ function inputs() {
     fgtsJuros: parseBR($('fgtsJuros').value),
     liquidoOriginal: parseBR($('liquidoOriginal').value),
     taxaAnual: parseBR($('taxaAnual').value) / 100,
+    advogadoPct: Math.max(0, parseBR($('advogadoPct').value) / 100),
     parcelas: Number($('parcelas').value || 1)
   };
 }
@@ -79,17 +80,21 @@ function simulate(base, parcelas) {
 
   const brutoOriginal = base.valorCorrigido + base.juros;
   const brutoAcordo = Math.max(0, brutoOriginal - desagioTotal);
-  const liquidoDireto = Math.max(0, base.liquidoOriginal - desagioDireto);
+
+  const liquidoAntesAdvogado = Math.max(0, base.liquidoOriginal - desagioDireto);
+  const honorariosAdvogado = liquidoAntesAdvogado * base.advogadoPct;
+  const liquidoFinal = Math.max(0, liquidoAntesAdvogado - honorariosAdvogado);
+
   const fgtsOriginal = base.fgtsCorrigido + base.fgtsJuros;
   const fgtsFinal = Math.max(0, fgtsOriginal - desagioFGTS);
-  const totalEconomico = liquidoDireto + fgtsFinal;
-  const parcelaMedia = parcelas > 0 ? liquidoDireto / parcelas : 0;
+  const totalEconomico = liquidoFinal + fgtsFinal;
+  const parcelaMedia = parcelas > 0 ? liquidoFinal / parcelas : 0;
 
   const taxaMensal = base.taxaAnual > -1
     ? Math.pow(1 + base.taxaAnual, 1 / 12) - 1
     : 0;
 
-  let valorPresente = liquidoDireto;
+  let valorPresente = liquidoFinal;
   if (parcelas > 1 && taxaMensal > 0) {
     valorPresente = 0;
     for (let i = 1; i <= parcelas; i += 1) {
@@ -106,13 +111,14 @@ function simulate(base, parcelas) {
     desagioTotal,
     brutoOriginal,
     brutoAcordo,
-    liquidoDireto,
+    liquidoAntesAdvogado,
+    honorariosAdvogado,
+    liquidoFinal,
     fgtsOriginal,
     fgtsFinal,
     totalEconomico,
     parcelaMedia,
-    valorPresente,
-    directReduction: Math.max(0, base.liquidoOriginal - liquidoDireto)
+    valorPresente
   };
 }
 
@@ -137,6 +143,9 @@ function renderValidation(base) {
   if (base.fgtsCorrigido > base.valorCorrigido) {
     warnings.push('O valor corrigido do FGTS está maior que o valor corrigido total. Confira a digitação.');
   }
+  if (base.advogadoPct > 1) {
+    warnings.push('O desconto do advogado está acima de 100%. Confira o percentual.');
+  }
 
   if (warnings.length) {
     box.className = 'validation validation--warning';
@@ -145,16 +154,17 @@ function renderValidation(base) {
   }
 
   box.className = 'validation validation--success';
-  box.innerHTML = '<strong>Dados completos.</strong> A comparação de cenários foi atualizada automaticamente.';
+  box.innerHTML = `<strong>Dados completos.</strong> A comparação já considera ${pct(base.advogadoPct)} de desconto do advogado.`;
 }
 
 function clearResults() {
   [
     'liquido',
+    'preLawyerValue',
     'parcelaMedia',
+    'honorariosAdvogado',
     'fgtsFinal',
     'desagio',
-    'directReduction',
     'brutoAcordo',
     'totalEconomico',
     'valorPresente'
@@ -188,13 +198,14 @@ function render() {
   }
 
   const result = simulate(base, base.parcelas);
-  $('ruleBadge').textContent = result.label;
-  $('liquido').textContent = fmt(result.liquidoDireto);
+  $('ruleBadge').textContent = `${result.label} · advogado ${pct(base.advogadoPct)}`;
+  $('liquido').textContent = fmt(result.liquidoFinal);
+  $('preLawyerValue').textContent = fmt(result.liquidoAntesAdvogado);
   $('originalValue').textContent = fmt(base.liquidoOriginal);
   $('parcelaMedia').textContent = fmt(result.parcelaMedia);
+  $('honorariosAdvogado').textContent = fmt(result.honorariosAdvogado);
   $('fgtsFinal').textContent = fmt(result.fgtsFinal);
   $('desagio').textContent = fmt(result.desagioTotal);
-  $('directReduction').textContent = fmt(result.directReduction);
   $('brutoAcordo').textContent = fmt(result.brutoAcordo);
   $('totalEconomico').textContent = fmt(result.totalEconomico);
   $('valorPresente').textContent = fmt(result.valorPresente);
@@ -207,10 +218,10 @@ function render() {
     return `<tr class="${n === base.parcelas ? 'active' : ''}">
       <td>${n === 1 ? 'À vista' : `${n} parcelas`}</td>
       <td>${pct(scenario.rate)}</td>
-      <td>${fmt(scenario.liquidoDireto)}</td>
+      <td>${fmt(scenario.honorariosAdvogado)}</td>
+      <td>${fmt(scenario.liquidoFinal)}</td>
       <td>${fmt(scenario.parcelaMedia)}</td>
       <td>${fmt(scenario.fgtsFinal)}</td>
-      <td>${fmt(scenario.brutoAcordo)}</td>
       <td>${fmt(scenario.valorPresente)}</td>
     </tr>`;
   }).join('');
@@ -222,14 +233,15 @@ function render() {
     ['“FGTS 8%” → Juros', base.fgtsJuros],
     ['Líquido Devido ao Reclamante', base.liquidoOriginal],
     ['Juros ligados ao pagamento direto', result.jurosDiretos],
-    [`Deságio no pagamento direto (${pct(result.rate)})`, result.desagioDireto],
-    [`Deságio no FGTS (${pct(result.rate)})`, result.desagioFGTS],
-    ['Deságio total', result.desagioTotal],
-    ['Bruto original do crédito', result.brutoOriginal],
-    ['Bruto do crédito após deságio', result.brutoAcordo],
-    ['Recebimento direto estimado', result.liquidoDireto],
+    [`Deságio APS no pagamento direto (${pct(result.rate)})`, result.desagioDireto],
+    [`Deságio APS no FGTS (${pct(result.rate)})`, result.desagioFGTS],
+    ['Deságio APS total', result.desagioTotal],
+    ['Recebimento direto após deságio e antes do advogado', result.liquidoAntesAdvogado],
+    [`Honorários contratuais do advogado (${pct(base.advogadoPct)})`, result.honorariosAdvogado],
+    ['Líquido final após advogado', result.liquidoFinal],
     ['FGTS após deságio', result.fgtsFinal],
-    ['Total econômico (direto + FGTS)', result.totalEconomico]
+    ['Total econômico final (líquido + FGTS)', result.totalEconomico],
+    ['Bruto do crédito após deságio', result.brutoAcordo]
   ];
 
   $('memory').innerHTML = items
