@@ -1,0 +1,330 @@
+/* Vantajosidade financeira: extensão do simulador em linguagem de planilha técnica. */
+
+.investment-analysis {
+  margin-top: 34px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.investment-analysis__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr);
+  gap: 32px;
+  align-items: end;
+  padding: 30px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.investment-analysis__header h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.45rem);
+  line-height: 1.06;
+  letter-spacing: -.035em;
+}
+
+.investment-analysis__header > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: .9rem;
+}
+
+.investment-assumptions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.investment-assumptions > div {
+  padding: 17px 20px;
+  border-right: 1px solid var(--line);
+}
+
+.investment-assumptions > div:last-child {
+  border-right: 0;
+}
+
+.investment-assumptions span,
+.investment-assumptions strong {
+  display: block;
+}
+
+.investment-assumptions span {
+  color: var(--muted);
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 800;
+}
+
+.investment-assumptions strong {
+  margin-top: 5px;
+  color: var(--navy);
+  font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.investment-visual {
+  padding: 28px 30px 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.investment-visual__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
+.investment-visual__head h3 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.investment-visual__head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .78rem;
+  text-align: right;
+}
+
+.investment-chart {
+  display: grid;
+  gap: 16px;
+}
+
+.investment-empty {
+  margin: 0;
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--paper-alt);
+  border: 1px dashed var(--line-strong);
+  text-align: center;
+  padding: 20px;
+}
+
+.investment-bar {
+  display: grid;
+  gap: 6px;
+}
+
+.investment-bar__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: baseline;
+}
+
+.investment-bar__meta strong {
+  color: var(--ink);
+  font-size: .8rem;
+}
+
+.investment-bar__meta span {
+  color: var(--navy);
+  font-size: .82rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.investment-bar__track {
+  height: 13px;
+  background: #e6ebf0;
+  overflow: hidden;
+}
+
+.investment-bar__track > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width .22s ease;
+}
+
+.investment-bar.is-best .investment-bar__track > span {
+  background: var(--positive);
+}
+
+.investment-bar.is-best .investment-bar__meta strong::after {
+  content: " melhor";
+  margin-left: 7px;
+  color: var(--positive);
+  font-size: .62rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  font-weight: 900;
+}
+
+.investment-bar small {
+  color: var(--muted);
+  font-size: .68rem;
+  line-height: 1.35;
+}
+
+.advantage-verdict {
+  display: grid;
+  grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.advantage-verdict__winner {
+  padding: 26px 30px;
+  background: var(--navy);
+  color: #fff;
+}
+
+.advantage-verdict__winner > span,
+.advantage-verdict__winner > strong,
+.advantage-verdict__winner > small {
+  display: block;
+}
+
+.advantage-verdict__winner > span {
+  color: rgba(255,255,255,.58);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: .66rem;
+  font-weight: 850;
+}
+
+.advantage-verdict__winner > strong {
+  margin-top: 8px;
+  font-size: 2rem;
+  letter-spacing: -.04em;
+}
+
+.advantage-verdict__winner > b {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.advantage-verdict__winner > small {
+  margin-top: 10px;
+  color: rgba(255,255,255,.64);
+  line-height: 1.4;
+}
+
+.advantage-verdict__explanation {
+  padding: 26px 30px;
+  display: grid;
+  gap: 16px;
+  align-content: center;
+}
+
+.advantage-verdict__explanation p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.advantage-verdict__explanation .break-even {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.investment-ranking {
+  padding: 24px 30px 28px;
+}
+
+.investment-ranking__headline {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.investment-ranking__headline h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.investment-ranking__headline p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .74rem;
+  text-align: right;
+}
+
+.investment-analysis .table-shell table {
+  min-width: 980px;
+}
+
+.investment-top3 {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--navy);
+  font-size: .76rem;
+  line-height: 1.5;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+}
+
+.investment-footnote {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .investment-analysis__header,
+  .advantage-verdict {
+    grid-template-columns: 1fr;
+  }
+
+  .investment-assumptions {
+    grid-template-columns: 1fr;
+  }
+
+  .investment-assumptions > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .investment-assumptions > div:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .investment-analysis__header,
+  .investment-visual,
+  .advantage-verdict__winner,
+  .advantage-verdict__explanation,
+  .investment-ranking {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .investment-visual__head,
+  .investment-ranking__headline {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .investment-visual__head p,
+  .investment-ranking__headline p {
+    text-align: left;
+  }
+
+  .investment-bar__meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .investment-bar__track > span {
+    transition: none;
+  }
+}
