@@ -1,0 +1,210 @@
+/* Frontend Pro refinement: document-led calculator, not a generic dashboard. */
+
+.intro h1 {
+  max-width: 840px;
+  font-size: clamp(2.25rem, 4.8vw, 4.35rem);
+}
+
+.intro__copy {
+  max-width: 500px;
+}
+
+.source-location {
+  max-width: 620px;
+  line-height: 1.5 !important;
+}
+
+.source-location b {
+  color: var(--ink);
+  font-weight: 760;
+}
+
+.field-row--essential .field-row__text strong::after {
+  content: "copiar";
+  color: var(--accent);
+}
+
+.field-row:focus-within {
+  background: linear-gradient(to right, rgba(233, 241, 248, .34), transparent 70%);
+}
+
+.rule-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 22px;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.rule-strip > div {
+  padding: 13px 14px;
+  border-right: 1px solid var(--line);
+}
+
+.rule-strip > div:last-child {
+  border-right: 0;
+}
+
+.rule-strip strong,
+.rule-strip span {
+  display: block;
+}
+
+.rule-strip strong {
+  color: var(--navy);
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rule-strip span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.norm-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .74rem;
+  line-height: 1.45;
+}
+
+.result-panel {
+  border-top: 4px solid #7da9cc;
+}
+
+.result-main > strong,
+.result-ledger strong,
+td:not(:first-child),
+.completion span,
+.money-input input,
+.percent-input input {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.table-shell table {
+  min-width: 960px;
+}
+
+.table-shell th:not(:first-child),
+.table-shell td:not(:first-child) {
+  text-align: right;
+}
+
+.table-shell tbody tr.active td:first-child {
+  font-weight: 900;
+}
+
+.calculation-memory summary {
+  user-select: none;
+}
+
+@media (max-width: 980px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .result-panel {
+    position: static;
+  }
+
+  .intro {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .intro__copy {
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 700px) {
+  .shell {
+    width: min(100% - 24px, 1240px);
+  }
+
+  .page {
+    padding-top: 32px;
+  }
+
+  .app-header__inner {
+    min-height: 64px;
+  }
+
+  .trust-line {
+    display: none;
+  }
+
+  .intro h1 {
+    font-size: clamp(2rem, 11vw, 3rem);
+    line-height: 1.02;
+  }
+
+  .worksheet__header,
+  .sheet-section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .source-note {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  .validation {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .money-input {
+    width: 100%;
+  }
+
+  .condition-grid,
+  .rule-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-strip > div {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .rule-strip > div:last-child {
+    border-bottom: 0;
+  }
+
+  .quick-scenarios button {
+    min-height: 42px;
+  }
+
+  .result-ledger {
+    grid-template-columns: 1fr;
+  }
+
+  .result-ledger > div,
+  .result-ledger > div:nth-child(even) {
+    border-right: 0;
+  }
+
+  .result-ledger__wide {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
