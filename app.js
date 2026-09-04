@@ -5,6 +5,8 @@ const fields = [
   'brutoPagina','fgtsPagina','honorarios','multas','taxaAnual'
 ];
 
+const requiredIds = ['valorCorrigido','juros','fgtsCorrigido','fgtsJuros','liquidoOriginal'];
+
 function parseBR(value) {
   if (typeof value !== 'string') return Number(value) || 0;
   const s = value.trim().replace(/\s/g, '').replace(/R\$/gi, '');
@@ -16,6 +18,13 @@ function parseBR(value) {
 
 function fmt(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+}
+
+function fmtInput(value) {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value || 0);
 }
 
 function pct(value) {
@@ -44,12 +53,17 @@ function inputs() {
   };
 }
 
+function requiredFilledCount() {
+  return requiredIds.filter(id => $(id).value.trim() !== '').length;
+}
+
+function isComplete() {
+  return requiredFilledCount() === requiredIds.length;
+}
+
 function simulate(base, parcelas) {
   const rule = getRule(parcelas);
 
-  // O total de juros da primeira tabela inclui os juros embutidos na linha FGTS 8%.
-  // Para saber quanto o deságio reduz o valor pago diretamente ao reclamante,
-  // retiramos os juros do FGTS da base direta. O FGTS é tratado separadamente.
   const jurosDiretos = Math.max(0, base.juros - base.fgtsJuros);
   const baseDiretaDesagio = jurosDiretos + base.multas;
   const desagioDireto = baseDiretaDesagio * rule.rate;
@@ -96,53 +110,87 @@ function difference(a, b) {
   return Math.abs(a - b);
 }
 
+function renderProgress() {
+  $('requiredProgress').textContent = `${requiredFilledCount()}/${requiredIds.length}`;
+}
+
 function renderValidation(base) {
   const box = $('validation');
-  const required = [base.valorCorrigido, base.juros, base.fgtsCorrigido, base.fgtsJuros, base.liquidoOriginal];
 
-  if (required.some(v => !v)) {
-    box.className = 'validation-box neutral';
-    box.innerHTML = '<strong>Aguardando dados.</strong> Preencha os cinco campos necessários copiando a primeira página do cálculo.';
+  if (!isComplete()) {
+    const missing = requiredIds.length - requiredFilledCount();
+    box.className = 'validation validation--neutral';
+    box.innerHTML = `<strong>Faltam ${missing} ${missing === 1 ? 'dado essencial' : 'dados essenciais'}.</strong> Continue copiando a primeira página do cálculo.`;
     return;
   }
 
   const checks = [];
+  if (base.fgtsJuros > base.juros) {
+    checks.push('⚠ Os juros do FGTS não podem ser maiores que os juros totais.');
+  }
+
   if (base.brutoPagina > 0) {
     const expected = base.valorCorrigido + base.juros;
-    const ok = difference(expected, base.brutoPagina) <= 0.05;
-    checks.push(`${ok ? '✓' : '⚠'} Bruto: ${ok ? 'confere' : `há diferença de ${fmt(difference(expected, base.brutoPagina))}`}`);
+    const diff = difference(expected, base.brutoPagina);
+    const ok = diff <= 0.05;
+    checks.push(`${ok ? '✓' : '⚠'} Bruto: ${ok ? 'confere' : `diferença de ${fmt(diff)}`}`);
   }
 
   if (base.fgtsPagina > 0) {
     const expected = base.fgtsCorrigido + base.fgtsJuros;
-    const ok = difference(expected, base.fgtsPagina) <= 0.05;
-    checks.push(`${ok ? '✓' : '⚠'} FGTS: ${ok ? 'confere' : `há diferença de ${fmt(difference(expected, base.fgtsPagina))}`}`);
+    const diff = difference(expected, base.fgtsPagina);
+    const ok = diff <= 0.05;
+    checks.push(`${ok ? '✓' : '⚠'} FGTS: ${ok ? 'confere' : `diferença de ${fmt(diff)}`}`);
   }
 
   if (!checks.length) {
-    box.className = 'validation-box success';
-    box.innerHTML = '<strong>Dados essenciais preenchidos.</strong> Você já pode comparar as modalidades. Preencha os campos de conferência se quiser validar a digitação.';
-  } else {
-    const hasWarning = checks.some(x => x.startsWith('⚠'));
-    box.className = `validation-box ${hasWarning ? 'warning' : 'success'}`;
-    box.innerHTML = `<strong>Conferência automática:</strong> ${checks.join(' · ')}`;
+    box.className = 'validation validation--success';
+    box.innerHTML = '<strong>Dados essenciais completos.</strong> A comparação de cenários está pronta. Você pode preencher as conferências opcionais para validar a digitação.';
+    return;
   }
+
+  const hasWarning = checks.some(x => x.startsWith('⚠'));
+  box.className = `validation validation--${hasWarning ? 'warning' : 'success'}`;
+  box.innerHTML = `<strong>Conferência automática:</strong> ${checks.join(' · ')}`;
+}
+
+function clearResults() {
+  ['liquido','parcelaMedia','fgtsFinal','desagio','totalEconomico','valorPresente','originalValue','directReduction']
+    .forEach(id => $(id).textContent = '—');
+
+  $('compareBody').innerHTML = '<tr><td colspan="7" class="empty-row">Preencha os dados essenciais para comparar as modalidades.</td></tr>';
+  $('memory').innerHTML = '<div class="memory-item"><span>Memória de cálculo</span><strong>Complete os dados essenciais para gerar a memória.</strong></div>';
+}
+
+function renderScenarioButtons(parcelas) {
+  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach(button => {
+    const active = Number(button.dataset.parcelas) === parcelas;
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
 }
 
 function render() {
   const base = inputs();
   const r = simulate(base, base.parcelas);
 
+  renderProgress();
+  renderValidation(base);
+  renderScenarioButtons(base.parcelas);
   $('ruleBadge').textContent = r.label;
+
+  if (!isComplete()) {
+    clearResults();
+    return;
+  }
+
   $('liquido').textContent = fmt(r.liquidoDireto);
   $('parcelaMedia').textContent = fmt(r.parcelaMedia);
   $('fgtsFinal').textContent = fmt(r.fgtsFinal);
   $('desagio').textContent = fmt(r.desagioTotal);
   $('totalEconomico').textContent = fmt(r.totalEconomico);
-  $('brutoAcordo').textContent = fmt(r.brutoAcordo);
   $('valorPresente').textContent = fmt(r.valorPresente);
-
-  renderValidation(base);
+  $('originalValue').textContent = fmt(base.liquidoOriginal);
+  $('directReduction').textContent = fmt(r.desagioDireto);
 
   const options = [...new Set([1, 12, 13, 14, 24, base.parcelas])].sort((a,b)=>a-b);
   $('compareBody').innerHTML = options.map(n => {
@@ -184,7 +232,30 @@ function initParcelas() {
     .join('');
 }
 
+function initMoneyFormatting() {
+  document.querySelectorAll('[data-money]').forEach(input => {
+    input.addEventListener('blur', () => {
+      if (!input.value.trim()) return;
+      const value = parseBR(input.value);
+      input.value = fmtInput(value);
+      render();
+    });
+  });
+}
+
+function initQuickScenarios() {
+  document.querySelectorAll('#scenarioQuick [data-parcelas]').forEach(button => {
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => {
+      $('parcelas').value = button.dataset.parcelas;
+      render();
+    });
+  });
+}
+
 initParcelas();
+initMoneyFormatting();
+initQuickScenarios();
 fields.forEach(id => $(id).addEventListener('input', render));
 $('parcelas').addEventListener('change', render);
 $('printBtn').addEventListener('click', () => window.print());
