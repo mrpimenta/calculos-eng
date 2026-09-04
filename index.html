@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cálculos Eng · Simulador de Acordo APS</title>
-  <meta name="description" content="Simulador de deságio e parcelamento para acordos APS a partir da primeira página do cálculo Blanco." />
+  <meta name="description" content="Simulador de deságio e parcelamento APS a partir da primeira página do cálculo Blanco." />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="enhancements.css" />
 </head>
 <body>
   <header class="app-header">
@@ -18,7 +19,7 @@
           <span>Simulador de Acordo APS</span>
         </div>
       </div>
-      <div class="trust-line" aria-label="Informações de privacidade e processamento">
+      <div class="trust-line" aria-label="Privacidade do simulador">
         <span>Processamento local</span>
         <span>Nenhum dado é enviado</span>
       </div>
@@ -29,9 +30,9 @@
     <section class="intro" aria-labelledby="page-title">
       <div>
         <p class="eyebrow">Liquidação trabalhista · apoio à decisão</p>
-        <h1 id="page-title">Copie a 1ª página do Blanco.<br />Compare o acordo.</h1>
+        <h1 id="page-title">Preencha somente 5 valores da 1ª página do Blanco.</h1>
       </div>
-      <p class="intro__copy">O formulário segue a ordem da primeira página do cálculo. Você informa os totais, escolhe o número de parcelas e o sistema aplica a faixa de deságio da política da APS.</p>
+      <p class="intro__copy">Os rótulos abaixo repetem o texto do cálculo e indicam exatamente onde localizar cada número. Depois, escolha o parcelamento para ver deságio, parcela mensal e total estimado.</p>
     </section>
 
     <div class="workspace">
@@ -39,19 +40,19 @@
         <div class="worksheet__header">
           <div>
             <p class="eyebrow">Entrada de dados</p>
-            <h2 id="worksheet-title">Dados da primeira página</h2>
+            <h2 id="worksheet-title">Copie apenas o indispensável</h2>
           </div>
           <div class="completion" aria-live="polite">
             <span id="requiredProgress">0/5</span>
-            <small>essenciais preenchidos</small>
+            <small>campos preenchidos</small>
           </div>
         </div>
 
         <div class="source-note">
           <span class="source-note__rule" aria-hidden="true"></span>
           <div>
-            <strong>Use os valores exatamente como aparecem no cálculo.</strong>
-            <p>Os campos essenciais ficam sinalizados abaixo. Os campos de conferência são opcionais e ajudam a detectar erro de digitação.</p>
+            <strong>Não use outros valores da página.</strong>
+            <p>Bruto devido, depósito de FGTS, IRPF, contribuição social e honorários não precisam ser digitados. O simulador trabalha com os cinco campos abaixo.</p>
           </div>
         </div>
 
@@ -59,16 +60,16 @@
           <div class="sheet-section__heading">
             <div class="step-index" aria-hidden="true">01</div>
             <div>
-              <p class="section-source">Tabela “Resumo do Cálculo”</p>
-              <h3 id="resumo-title">Linha Total e FGTS 8%</h3>
+              <p class="section-source">Quadro “Resumo do Cálculo”</p>
+              <h3 id="resumo-title">Copie 4 valores deste quadro</h3>
             </div>
           </div>
 
           <div class="field-list">
-            <label class="field-row" for="valorCorrigido">
+            <label class="field-row field-row--essential" for="valorCorrigido">
               <span class="field-row__text">
-                <strong>Total — Valor Corrigido</strong>
-                <small>Linha “Total” · coluna “Valor Corrigido”</small>
+                <strong>“Total” → coluna “Valor Corrigido”</strong>
+                <small class="source-location"><b>Onde localizar:</b> quadro “Resumo do Cálculo” → última linha “Total” → coluna “Valor Corrigido”.</small>
               </span>
               <span class="money-input">
                 <span>R$</span>
@@ -76,10 +77,10 @@
               </span>
             </label>
 
-            <label class="field-row" for="juros">
+            <label class="field-row field-row--essential" for="juros">
               <span class="field-row__text">
-                <strong>Total — Juros</strong>
-                <small>Linha “Total” · coluna “Juros”</small>
+                <strong>“Total” → coluna “Juros”</strong>
+                <small class="source-location"><b>Onde localizar:</b> quadro “Resumo do Cálculo” → última linha “Total” → coluna “Juros”.</small>
               </span>
               <span class="money-input">
                 <span>R$</span>
@@ -87,10 +88,10 @@
               </span>
             </label>
 
-            <label class="field-row" for="fgtsCorrigido">
+            <label class="field-row field-row--essential" for="fgtsCorrigido">
               <span class="field-row__text">
-                <strong>FGTS 8% — Valor Corrigido</strong>
-                <small>Linha “FGTS 8%” · coluna “Valor Corrigido”</small>
+                <strong>“FGTS 8%” → coluna “Valor Corrigido”</strong>
+                <small class="source-location"><b>Onde localizar:</b> quadro “Resumo do Cálculo” → linha “FGTS 8%” → coluna “Valor Corrigido”.</small>
               </span>
               <span class="money-input">
                 <span>R$</span>
@@ -98,10 +99,10 @@
               </span>
             </label>
 
-            <label class="field-row" for="fgtsJuros">
+            <label class="field-row field-row--essential" for="fgtsJuros">
               <span class="field-row__text">
-                <strong>FGTS 8% — Juros</strong>
-                <small>Linha “FGTS 8%” · coluna “Juros”</small>
+                <strong>“FGTS 8%” → coluna “Juros”</strong>
+                <small class="source-location"><b>Onde localizar:</b> quadro “Resumo do Cálculo” → linha “FGTS 8%” → coluna “Juros”.</small>
               </span>
               <span class="money-input">
                 <span>R$</span>
@@ -115,53 +116,20 @@
           <div class="sheet-section__heading">
             <div class="step-index" aria-hidden="true">02</div>
             <div>
-              <p class="section-source">Tabela “Créditos e Descontos do Reclamante”</p>
-              <h3 id="creditos-title">Valor líquido e conferências</h3>
+              <p class="section-source">Quadro “Descrição de Créditos e Descontos do Reclamante”</p>
+              <h3 id="creditos-title">Copie 1 valor deste quadro</h3>
             </div>
           </div>
 
           <div class="field-list">
             <label class="field-row field-row--essential" for="liquidoOriginal">
               <span class="field-row__text">
-                <strong>Líquido Devido ao Reclamante</strong>
-                <small>Valor final da tabela de créditos e descontos</small>
+                <strong>“Líquido Devido ao Reclamante”</strong>
+                <small class="source-location"><b>Onde localizar:</b> quadro “Descrição de Créditos e Descontos do Reclamante” → última linha “Líquido Devido ao Reclamante”.</small>
               </span>
               <span class="money-input">
                 <span>R$</span>
                 <input id="liquidoOriginal" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
-              </span>
-            </label>
-
-            <label class="field-row field-row--optional" for="brutoPagina">
-              <span class="field-row__text">
-                <strong>Bruto Devido ao Reclamante <em>conferência</em></strong>
-                <small>Opcional · usado para validar Valor Corrigido + Juros</small>
-              </span>
-              <span class="money-input">
-                <span>R$</span>
-                <input id="brutoPagina" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
-              </span>
-            </label>
-
-            <label class="field-row field-row--optional" for="fgtsPagina">
-              <span class="field-row__text">
-                <strong>FGTS <em>conferência</em></strong>
-                <small>Opcional · deve coincidir com FGTS corrigido + juros</small>
-              </span>
-              <span class="money-input">
-                <span>R$</span>
-                <input id="fgtsPagina" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
-              </span>
-            </label>
-
-            <label class="field-row field-row--optional" for="honorarios">
-              <span class="field-row__text">
-                <strong>Honorários líquidos dos patronos <em>opcional</em></strong>
-                <small>Informativo · não reduz o valor direto do reclamante</small>
-              </span>
-              <span class="money-input">
-                <span>R$</span>
-                <input id="honorarios" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
               </span>
             </label>
           </div>
@@ -172,7 +140,7 @@
             <div class="step-index" aria-hidden="true">03</div>
             <div>
               <p class="section-source">Condições do acordo</p>
-              <h3 id="condicoes-title">Parcelamento e valor presente</h3>
+              <h3 id="condicoes-title">Escolha a forma de recebimento</h3>
             </div>
           </div>
 
@@ -193,41 +161,34 @@
                 <input id="taxaAnual" inputmode="decimal" value="15,00" />
                 <span>% a.a.</span>
               </div>
-              <small class="control-help">Usada somente para comparar o valor presente das modalidades.</small>
+              <small class="control-help">Usada apenas para comparar o valor presente. Não altera o deságio da APS.</small>
             </div>
           </div>
 
-          <details class="advanced">
-            <summary>O cálculo tem multa sujeita a deságio?</summary>
-            <label class="advanced__field" for="multas">
-              <span>
-                <strong>Multas sujeitas ao deságio</strong>
-                <small>Se não houver valor destacado na página, deixe em branco.</small>
-              </span>
-              <span class="money-input">
-                <span>R$</span>
-                <input id="multas" data-money inputmode="decimal" autocomplete="off" placeholder="0,00" />
-              </span>
-            </label>
-          </details>
+          <div class="rule-strip" aria-label="Faixas de deságio usadas pelo simulador">
+            <div><strong>À vista</strong><span>70% sobre juros</span></div>
+            <div><strong>2 a 12 parcelas</strong><span>50% sobre juros</span></div>
+            <div><strong>13 a 24 parcelas</strong><span>30% sobre juros</span></div>
+          </div>
+          <p class="norm-note">Nos parcelamentos, considere também a condição normativa de vencimento da primeira parcela prevista no acordo.</p>
         </section>
 
         <div id="validation" class="validation validation--neutral" role="status" aria-live="polite">
-          Preencha os cinco dados essenciais para iniciar a conferência automática.
+          Preencha os cinco campos indicados acima para calcular.
         </div>
       </section>
 
       <aside class="result-panel" aria-labelledby="result-title">
         <div class="result-panel__topline">
           <p class="result-kicker">Cenário selecionado</p>
-          <span id="ruleBadge" class="rule-badge">—</span>
+          <span id="ruleBadge" class="rule-badge">Aguardando preenchimento</span>
         </div>
 
         <div class="result-main">
           <span id="result-title">Recebimento direto estimado</span>
           <strong id="liquido">—</strong>
           <div class="result-main__comparison">
-            <span>Original Blanco</span>
+            <span>Líquido original do Blanco</span>
             <b id="originalValue">—</b>
           </div>
         </div>
@@ -250,6 +211,10 @@
             <strong id="directReduction">—</strong>
           </div>
           <div class="result-ledger__wide">
+            <span>Bruto do crédito após deságio</span>
+            <strong id="brutoAcordo">—</strong>
+          </div>
+          <div class="result-ledger__wide">
             <span>Total econômico · direto + FGTS</span>
             <strong id="totalEconomico">—</strong>
           </div>
@@ -268,9 +233,9 @@
       <div class="section-headline">
         <div>
           <p class="eyebrow">Comparação de cenários</p>
-          <h2 id="comparison-title">O efeito da faixa de deságio em cada modalidade</h2>
+          <h2 id="comparison-title">Veja o efeito de cada faixa de deságio</h2>
         </div>
-        <p>Compare o valor direto, o FGTS e o valor presente sem alterar os dados da primeira página.</p>
+        <p>Os mesmos cinco valores são reaproveitados para comparar à vista, 12x, 13x, 14x e 24x.</p>
       </div>
 
       <div class="table-shell">
@@ -282,7 +247,7 @@
               <th>Total direto</th>
               <th>Parcela média</th>
               <th>FGTS</th>
-              <th>Direto + FGTS</th>
+              <th>Bruto após deságio</th>
               <th>Valor presente</th>
             </tr>
           </thead>
