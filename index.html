@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Simulador de Acordo APS</title>
-  <meta name="description" content="Simulador de deságio e parcelamento para acordos APS." />
+  <meta name="description" content="Simulador de deságio e parcelamento para acordos APS a partir da primeira página do cálculo judicial." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
     <div class="container">
       <div class="eyebrow">Processo dos Engenheiros · Simulador</div>
       <h1>Simulador de Acordo APS</h1>
-      <p>Informe os totais da primeira página do cálculo e compare o efeito do deságio sobre juros/multas conforme a quantidade de parcelas.</p>
+      <p>Copie os valores diretamente da primeira página do seu cálculo Blanco e compare quanto receberia em cada modalidade de acordo.</p>
       <div class="badges">
         <span>1x: 70% de deságio</span>
         <span>2–12x: 50%</span>
@@ -26,48 +26,89 @@
       <div class="section-title">
         <div>
           <p class="kicker">Entradas</p>
-          <h2>Dados do cálculo</h2>
+          <h2>Copie da 1ª página do cálculo</h2>
         </div>
       </div>
 
-      <div class="form-grid">
-        <label>
-          <span>Valor corrigido total</span>
-          <input id="valorCorrigido" inputmode="decimal" placeholder="Ex.: 500.000,00" />
-          <small>Total da coluna “Valor Corrigido”.</small>
-        </label>
-        <label>
-          <span>Juros total</span>
-          <input id="juros" inputmode="decimal" placeholder="Ex.: 250.000,00" />
-          <small>Total da coluna “Juros”.</small>
-        </label>
-        <label>
-          <span>Multas</span>
-          <input id="multas" inputmode="decimal" placeholder="0,00" />
-          <small>Se não houver, deixe em branco ou informe zero.</small>
-        </label>
-        <label>
-          <span>FGTS — valor corrigido</span>
-          <input id="fgtsCorrigido" inputmode="decimal" placeholder="0,00" />
-        </label>
-        <label>
-          <span>FGTS — juros</span>
-          <input id="fgtsJuros" inputmode="decimal" placeholder="0,00" />
-        </label>
-        <label>
-          <span>IRPF do reclamante</span>
-          <input id="irpf" inputmode="decimal" placeholder="0,00" />
-        </label>
-        <label>
-          <span>Outros descontos do reclamante</span>
-          <input id="outrosDescontos" inputmode="decimal" placeholder="0,00" />
-        </label>
-        <label>
-          <span>Honorários dos patronos</span>
-          <input id="honorarios" inputmode="decimal" placeholder="0,00" />
-          <small>Informativo; não reduz o líquido direto nesta simulação.</small>
-        </label>
+      <div class="source-guide">
+        <strong>Use os nomes exatamente como aparecem no Blanco.</strong>
+        <span>Os cinco campos marcados como necessários bastam para calcular o valor direto, o FGTS e as parcelas. Os campos de conferência são opcionais.</span>
       </div>
+
+      <div class="input-group">
+        <div class="group-heading">
+          <div>
+            <p class="kicker">Tabela 1</p>
+            <h3>Resumo do Cálculo</h3>
+          </div>
+          <span class="source-chip">linha “Total” + linha “FGTS 8%”</span>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span>Total — Valor Corrigido <b class="required">necessário</b></span>
+            <input id="valorCorrigido" inputmode="decimal" placeholder="Copie a coluna Valor Corrigido da linha Total" />
+            <small>Primeira tabela, última linha (“Total”), coluna “Valor Corrigido”.</small>
+          </label>
+          <label>
+            <span>Total — Juros <b class="required">necessário</b></span>
+            <input id="juros" inputmode="decimal" placeholder="Copie a coluna Juros da linha Total" />
+            <small>Primeira tabela, última linha (“Total”), coluna “Juros”.</small>
+          </label>
+          <label>
+            <span>FGTS 8% — Valor Corrigido <b class="required">necessário</b></span>
+            <input id="fgtsCorrigido" inputmode="decimal" placeholder="Copie o Valor Corrigido da linha FGTS 8%" />
+            <small>Linha “FGTS 8%”, coluna “Valor Corrigido”.</small>
+          </label>
+          <label>
+            <span>FGTS 8% — Juros <b class="required">necessário</b></span>
+            <input id="fgtsJuros" inputmode="decimal" placeholder="Copie os Juros da linha FGTS 8%" />
+            <small>Linha “FGTS 8%”, coluna “Juros”.</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="group-heading">
+          <div>
+            <p class="kicker">Tabela 2</p>
+            <h3>Créditos e Descontos do Reclamante</h3>
+          </div>
+          <span class="source-chip">valor líquido</span>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span>Líquido Devido ao Reclamante <b class="required">necessário</b></span>
+            <input id="liquidoOriginal" inputmode="decimal" placeholder="Copie o Líquido Devido ao Reclamante" />
+            <small>Use o valor final da tabela “Descrição de Créditos e Descontos do Reclamante”.</small>
+          </label>
+          <label>
+            <span>Bruto Devido ao Reclamante <b class="optional">conferência</b></span>
+            <input id="brutoPagina" inputmode="decimal" placeholder="Opcional" />
+            <small>Serve apenas para conferir se Valor Corrigido + Juros foi digitado corretamente.</small>
+          </label>
+          <label>
+            <span>FGTS <b class="optional">conferência</b></span>
+            <input id="fgtsPagina" inputmode="decimal" placeholder="Opcional" />
+            <small>Valor “FGTS” da tabela. Deve coincidir com FGTS corrigido + juros.</small>
+          </label>
+          <label>
+            <span>Honorários líquidos dos patronos <b class="optional">opcional</b></span>
+            <input id="honorarios" inputmode="decimal" placeholder="Opcional" />
+            <small>Informativo. Não é subtraído do valor recebido pelo reclamante.</small>
+          </label>
+        </div>
+      </div>
+
+      <details class="advanced">
+        <summary>Campo adicional, somente se o cálculo tiver multa sujeita ao deságio</summary>
+        <label>
+          <span>Multas sujeitas ao deságio</span>
+          <input id="multas" inputmode="decimal" placeholder="0,00" />
+          <small>No cálculo usado como modelo não há multa destacada na primeira página. Deixe em branco se não houver.</small>
+        </label>
+      </details>
 
       <div class="divider"></div>
 
@@ -77,26 +118,30 @@
           <select id="parcelas"></select>
         </label>
         <label>
-          <span>Taxa anual para valor presente</span>
+          <span>Taxa anual para comparar valor presente</span>
           <input id="taxaAnual" inputmode="decimal" value="15,00" />
-          <small>Opcional, para comparar o valor financeiro das modalidades.</small>
+          <small>Opcional. Altere para a taxa que quiser usar como referência financeira.</small>
         </label>
       </div>
 
+      <div id="validation" class="validation-box neutral">
+        Preencha os valores da primeira página para iniciar a conferência automática.
+      </div>
+
       <div class="notice">
-        O simulador aplica o deságio apenas a juros e multas. Valores tributários e previdenciários informados são preservados como estimativa e não são recalculados.
+        O simulador parte do “Líquido Devido ao Reclamante” já calculado pelo Blanco e reduz apenas a parcela dos juros/multas atingida pelo deságio. Assim, os descontos tributários já existentes na página 1 são preservados como referência e não são recalculados.
       </div>
     </section>
 
     <aside class="card result-card">
-      <p class="kicker">Resultado</p>
+      <p class="kicker">Quanto você recebe</p>
       <div id="ruleBadge" class="rule-badge">—</div>
       <div class="metric primary">
-        <span>Líquido direto estimado</span>
+        <span>Total direto estimado</span>
         <strong id="liquido">R$ 0,00</strong>
       </div>
       <div class="metric">
-        <span>Parcela média</span>
+        <span>Valor médio por parcela</span>
         <strong id="parcelaMedia">R$ 0,00</strong>
       </div>
       <div class="metric-row">
@@ -110,11 +155,15 @@
         </div>
       </div>
       <div class="metric">
+        <span>Total econômico (direto + FGTS)</span>
+        <strong id="totalEconomico">R$ 0,00</strong>
+      </div>
+      <div class="metric">
         <span>Crédito bruto após deságio</span>
         <strong id="brutoAcordo">R$ 0,00</strong>
       </div>
       <div class="metric">
-        <span>Valor presente estimado</span>
+        <span>Valor presente do recebimento direto</span>
         <strong id="valorPresente">R$ 0,00</strong>
       </div>
       <button id="printBtn" class="btn primary" type="button">Imprimir resumo</button>
@@ -133,9 +182,10 @@
             <tr>
               <th>Modalidade</th>
               <th>Deságio</th>
-              <th>Líquido direto</th>
+              <th>Total direto</th>
               <th>Parcela média</th>
               <th>FGTS</th>
+              <th>Direto + FGTS</th>
               <th>Valor presente</th>
             </tr>
           </thead>
