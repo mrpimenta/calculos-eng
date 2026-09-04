@@ -32,7 +32,7 @@
         <p class="eyebrow">Liquidação trabalhista · apoio à decisão</p>
         <h1 id="page-title">Preencha somente 5 valores da 1ª página do Blanco.</h1>
       </div>
-      <p class="intro__copy">Os rótulos abaixo repetem o texto do cálculo e indicam exatamente onde localizar cada número. Depois, escolha o parcelamento para ver deságio, parcela mensal e total estimado.</p>
+      <p class="intro__copy">Os rótulos abaixo repetem o texto do cálculo e indicam exatamente onde localizar cada número. Depois, escolha o parcelamento e aplique o desconto contratual do advogado para ver quanto efetivamente sobra.</p>
     </section>
 
     <div class="workspace">
@@ -44,7 +44,7 @@
           </div>
           <div class="completion" aria-live="polite">
             <span id="requiredProgress">0/5</span>
-            <small>campos preenchidos</small>
+            <small>campos do Blanco preenchidos</small>
           </div>
         </div>
 
@@ -52,7 +52,7 @@
           <span class="source-note__rule" aria-hidden="true"></span>
           <div>
             <strong>Não use outros valores da página.</strong>
-            <p>Bruto devido, depósito de FGTS, IRPF, contribuição social e honorários não precisam ser digitados. O simulador trabalha com os cinco campos abaixo.</p>
+            <p>Bruto devido, depósito de FGTS, IRPF, contribuição social e honorários da sucumbência não precisam ser digitados. O simulador trabalha com os cinco campos abaixo.</p>
           </div>
         </div>
 
@@ -165,6 +165,22 @@
             </div>
           </div>
 
+          <div class="lawyer-fee">
+            <div class="lawyer-fee__copy">
+              <p class="section-source">Dedução contratual</p>
+              <strong>Desconto do advogado</strong>
+              <small>Percentual aplicado sobre o recebimento direto depois do deságio da APS. O padrão é 14%. O FGTS separado não entra nesta base.</small>
+            </div>
+            <div class="lawyer-fee__control">
+              <label class="control-label" for="advogadoPct">Percentual do advogado</label>
+              <div class="percent-input">
+                <input id="advogadoPct" inputmode="decimal" value="14,00" />
+                <span>%</span>
+              </div>
+              <small class="control-help">Pode alterar o percentual ou usar 0% para desconsiderar esse desconto.</small>
+            </div>
+          </div>
+
           <div class="rule-strip" aria-label="Faixas de deságio usadas pelo simulador">
             <div><strong>À vista</strong><span>70% sobre juros</span></div>
             <div><strong>2 a 12 parcelas</strong><span>50% sobre juros</span></div>
@@ -185,9 +201,13 @@
         </div>
 
         <div class="result-main">
-          <span id="result-title">Recebimento direto estimado</span>
+          <span id="result-title">Líquido final após advogado</span>
           <strong id="liquido">—</strong>
           <div class="result-main__comparison">
+            <span>Após deságio, antes do advogado</span>
+            <b id="preLawyerValue">—</b>
+          </div>
+          <div class="result-main__comparison result-main__comparison--secondary">
             <span>Líquido original do Blanco</span>
             <b id="originalValue">—</b>
           </div>
@@ -195,37 +215,37 @@
 
         <div class="result-ledger">
           <div>
-            <span>Parcela média</span>
+            <span>Parcela líquida final</span>
             <strong id="parcelaMedia">—</strong>
+          </div>
+          <div>
+            <span>Honorários do advogado</span>
+            <strong id="honorariosAdvogado">—</strong>
           </div>
           <div>
             <span>FGTS separado</span>
             <strong id="fgtsFinal">—</strong>
           </div>
           <div>
-            <span>Deságio total</span>
+            <span>Deságio APS total</span>
             <strong id="desagio">—</strong>
-          </div>
-          <div>
-            <span>Redução no líquido direto</span>
-            <strong id="directReduction">—</strong>
           </div>
           <div class="result-ledger__wide">
             <span>Bruto do crédito após deságio</span>
             <strong id="brutoAcordo">—</strong>
           </div>
           <div class="result-ledger__wide">
-            <span>Total econômico · direto + FGTS</span>
+            <span>Total econômico final · líquido + FGTS</span>
             <strong id="totalEconomico">—</strong>
           </div>
           <div class="result-ledger__wide result-ledger__muted">
-            <span>Valor presente do recebimento direto</span>
+            <span>Valor presente do líquido final</span>
             <strong id="valorPresente">—</strong>
           </div>
         </div>
 
         <button id="printBtn" class="print-button" type="button">Imprimir resumo</button>
-        <p class="result-disclaimer">Simulação indicativa. O valor efetivo depende do termo, atualização, homologação e tratamento tributário/previdenciário aplicável.</p>
+        <p class="result-disclaimer">O desconto do advogado é tratado como honorário contratual sobre o recebimento direto após o deságio da APS. Simulação indicativa.</p>
       </aside>
     </div>
 
@@ -233,9 +253,9 @@
       <div class="section-headline">
         <div>
           <p class="eyebrow">Comparação de cenários</p>
-          <h2 id="comparison-title">Veja o efeito de cada faixa de deságio</h2>
+          <h2 id="comparison-title">Veja quanto sobra em cada modalidade</h2>
         </div>
-        <p>Os mesmos cinco valores são reaproveitados para comparar à vista, 12x, 13x, 14x e 24x.</p>
+        <p>O percentual do advogado é aplicado igualmente em todos os cenários para permitir comparação direta.</p>
       </div>
 
       <div class="table-shell">
@@ -243,11 +263,11 @@
           <thead>
             <tr>
               <th>Modalidade</th>
-              <th>Deságio</th>
-              <th>Total direto</th>
-              <th>Parcela média</th>
+              <th>Deságio APS</th>
+              <th>Advogado</th>
+              <th>Líquido final</th>
+              <th>Parcela líquida</th>
               <th>FGTS</th>
-              <th>Bruto após deságio</th>
               <th>Valor presente</th>
             </tr>
           </thead>
