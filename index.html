@@ -301,17 +301,17 @@
           <p class="eyebrow">Cenário alternativo · base global</p>
           <h2 id="global-discount-title">Desconto sobre o valor global do crédito</h2>
         </div>
-        <p>Este módulo é separado do cálculo de deságio sobre juros. Ele simula uma proposta em que 15%, 30% ou 50% são descontados de todo o crédito bruto original (Valor Corrigido + Juros), sem acumular os dois tipos de deságio.</p>
+        <p>Este módulo é separado do cálculo de deságio sobre juros. Ele simula uma proposta em que qualquer percentual entre 0% e 100% é descontado de todo o crédito bruto original (Valor Corrigido + Juros), sem acumular os dois tipos de deságio.</p>
       </div>
 
       <div class="global-discount-control">
         <div>
           <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
-          <select id="globalBaseDiscountRate">
-            <option value="15">15% sobre o valor global</option>
-            <option value="30" selected>30% sobre o valor global</option>
-            <option value="50">50% sobre o valor global</option>
-          </select>
+          <div class="percent-input global-discount-rate-input">
+            <input id="globalBaseDiscountRate" inputmode="decimal" value="30,00" autocomplete="off" aria-describedby="globalBaseDiscountHelp" />
+            <span>%</span>
+          </div>
+          <small id="globalBaseDiscountHelp" class="control-help">Digite qualquer percentual entre 0% e 100% ou use um dos atalhos abaixo.</small>
           <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
             <button type="button" data-global-rate="15">15%</button>
             <button type="button" data-global-rate="30">30%</button>
