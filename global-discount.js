@@ -101,9 +101,27 @@
     }
   }
 
+  function clampRatePercent(value) {
+    return Math.min(100, Math.max(0, parseBR(String(value))));
+  }
+
+  function readSelectedRate() {
+    return clampRatePercent(el('globalBaseDiscountRate').value) / 100;
+  }
+
+  function formatRateInput() {
+    const input = el('globalBaseDiscountRate');
+    const value = clampRatePercent(input.value);
+    input.value = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  }
+
   function renderQuickButtons(rate) {
     document.querySelectorAll('#globalDiscountQuick [data-global-rate]').forEach((button) => {
-      const active = Number(button.dataset.globalRate) === Math.round(rate * 100);
+      const presetRate = Number(button.dataset.globalRate) / 100;
+      const active = Math.abs(presetRate - rate) < 0.0001;
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
   }
@@ -115,7 +133,7 @@
     }
 
     const base = readBase();
-    const selectedRate = Math.max(0, parseBR(el('globalBaseDiscountRate').value) / 100);
+    const selectedRate = readSelectedRate();
     const result = simulateGlobal(base, selectedRate);
 
     el('wholeGlobalRate').textContent = percent(result.rate);
@@ -129,7 +147,8 @@
 
     renderQuickButtons(selectedRate);
 
-    const rates = [0.15, 0.30, 0.50];
+    const rates = [...new Set([0.15, 0.30, 0.50, Number(selectedRate.toFixed(6))])]
+      .sort((a, b) => a - b);
     el('wholeGlobalCompareBody').innerHTML = rates.map((rate) => {
       const scenario = simulateGlobal(base, rate);
       const active = Math.abs(rate - selectedRate) < 0.0001 ? 'active' : '';
@@ -148,7 +167,10 @@
   document.querySelectorAll('#globalDiscountQuick [data-global-rate]').forEach((button) => {
     button.setAttribute('aria-pressed', 'false');
     button.addEventListener('click', () => {
-      el('globalBaseDiscountRate').value = button.dataset.globalRate;
+      el('globalBaseDiscountRate').value = new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(Number(button.dataset.globalRate));
       render();
     });
   });
@@ -161,6 +183,12 @@
     node.addEventListener('blur', render);
   });
 
-  renderQuickButtons(parseBR(el('globalBaseDiscountRate').value) / 100);
+  const globalRateInput = el('globalBaseDiscountRate');
+  globalRateInput.addEventListener('blur', () => {
+    formatRateInput();
+    render();
+  });
+
+  renderQuickButtons(readSelectedRate());
   render();
 })();
