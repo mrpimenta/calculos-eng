@@ -8,6 +8,7 @@ Aplicação web estática para simular acordos em que a **Autoridade Portuária 
 - **2 a 12 parcelas: 50%** de deságio sobre juros.
 - **13 a 24 parcelas: 30%** de deságio sobre juros.
 - O parcelamento mantém aviso sobre a condição de vencimento da primeira parcela prevista na norma.
+- **Módulo alternativo de desconto sobre o valor global:** 15%, 30% ou 50% aplicados ao crédito bruto original, mantido separado do deságio sobre juros.
 
 ## Entrada de dados
 
@@ -39,6 +40,28 @@ Parcela média = Recebimento direto estimado ÷ número de parcelas
 ```
 
 O simulador preserva os demais descontos já refletidos no **Líquido Devido ao Reclamante** e não recalcula IRPF, contribuição previdenciária ou outros encargos.
+
+
+## Módulo alternativo — desconto sobre o valor global
+
+Além das regras de deságio **sobre juros**, o simulador possui um bloco independente para testar propostas com desconto de **15%, 30% ou 50% sobre o valor global**.
+
+Os dois métodos são apresentados separadamente e **não são cumulativos**.
+
+```text
+Crédito bruto original = Valor Corrigido + Juros
+Desconto global = Crédito bruto original × percentual global
+Crédito bruto após desconto = Crédito bruto original × (1 − percentual global)
+
+Líquido direto estimado antes do advogado = Líquido original × (1 − percentual global)
+Honorários contratuais = Líquido direto estimado × percentual do advogado
+Líquido final = Líquido direto estimado − honorários
+
+FGTS estimado após desconto = (FGTS corrigido + Juros do FGTS) × (1 − percentual global)
+Total econômico estimado = Líquido final + FGTS estimado após desconto
+```
+
+A distribuição proporcional sobre o líquido e o FGTS é uma **estimativa de apoio à decisão**. Este módulo não recalcula IRPF, contribuição previdenciária ou outros encargos; a base efetiva do acordo deve ser conferida no termo ou proposta concreta.
 
 ## Interface
 
