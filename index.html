@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="enhancements.css" />
   <link rel="stylesheet" href="investment.css" />
+  <link rel="stylesheet" href="global-discount.css" />
 </head>
 <body>
   <header class="app-header">
@@ -293,6 +294,90 @@
       </div>
     </section>
 
+
+    <section class="global-discount-analysis" aria-labelledby="global-discount-title">
+      <div class="global-discount-analysis__header">
+        <div>
+          <p class="eyebrow">Cenário alternativo · base global</p>
+          <h2 id="global-discount-title">Desconto sobre o valor global do crédito</h2>
+        </div>
+        <p>Este módulo é separado do cálculo de deságio sobre juros. Ele simula uma proposta em que 15%, 30% ou 50% são descontados de todo o crédito bruto original (Valor Corrigido + Juros), sem acumular os dois tipos de deságio.</p>
+      </div>
+
+      <div class="global-discount-control">
+        <div>
+          <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
+          <select id="globalBaseDiscountRate">
+            <option value="15">15% sobre o valor global</option>
+            <option value="30" selected>30% sobre o valor global</option>
+            <option value="50">50% sobre o valor global</option>
+          </select>
+          <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
+            <button type="button" data-global-rate="15">15%</button>
+            <button type="button" data-global-rate="30">30%</button>
+            <button type="button" data-global-rate="50">50%</button>
+          </div>
+        </div>
+        <p class="global-discount-control__explanation"><strong>Importante:</strong> esta é uma metodologia alternativa. O percentual escolhido aqui não é somado ao deságio sobre juros do módulo anterior. Para estimar o líquido e o FGTS, o sistema aplica proporcionalmente o mesmo fator de pagamento ao líquido original e ao FGTS separado.</p>
+      </div>
+
+      <div class="global-discount-summary" aria-live="polite">
+        <div>
+          <span>Desconto global selecionado</span>
+          <strong id="wholeGlobalRate">—</strong>
+        </div>
+        <div>
+          <span>Deságio global em reais</span>
+          <strong id="wholeGlobalDiscountAmount">—</strong>
+        </div>
+        <div>
+          <span>Crédito bruto após desconto</span>
+          <strong id="wholeGlobalGrossAfter">—</strong>
+        </div>
+        <div>
+          <span>Direto antes do advogado</span>
+          <strong id="wholeGlobalPreLawyer">—</strong>
+        </div>
+        <div>
+          <span>Honorários do advogado</span>
+          <strong id="wholeGlobalLawyer">—</strong>
+        </div>
+        <div class="global-discount-summary__primary">
+          <span>Líquido final após advogado</span>
+          <strong id="wholeGlobalNet">—</strong>
+        </div>
+        <div>
+          <span>FGTS estimado após desconto</span>
+          <strong id="wholeGlobalFgts">—</strong>
+        </div>
+        <div class="global-discount-summary__primary">
+          <span>Total econômico final · líquido + FGTS</span>
+          <strong id="wholeGlobalEconomic">—</strong>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Desconto global</th>
+              <th>APS paga</th>
+              <th>Redução do bruto</th>
+              <th>Bruto após desconto</th>
+              <th>Advogado</th>
+              <th>Líquido final</th>
+              <th>Total econômico</th>
+            </tr>
+          </thead>
+          <tbody id="wholeGlobalCompareBody">
+            <tr><td colspan="7" class="empty-row">Preencha os cinco valores do Blanco para comparar os descontos sobre o valor global.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="global-discount-note">Premissa deste módulo: o desconto global é aplicado ao crédito bruto original. Para apresentar uma estimativa do que sobra ao reclamante, o mesmo percentual é aplicado proporcionalmente ao “Líquido Devido ao Reclamante” e ao FGTS original. IRPF, contribuição previdenciária e demais encargos não são recalculados; confirme a base efetiva do acordo antes de usar o resultado como valor de liquidação.</p>
+    </section>
+
     <details class="calculation-memory">
       <summary>
         <span>
@@ -387,6 +472,7 @@
   </footer>
 
   <script src="app.js"></script>
+  <script src="global-discount.js"></script>
   <script src="investment.js"></script>
 </body>
 </html>
