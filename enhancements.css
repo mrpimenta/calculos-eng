@@ -306,3 +306,26 @@ td:not(:first-child),
     animation-duration: .01ms !important;
   }
 }
+
+
+/* Condições simplificadas: pagamento único à vista. */
+.fixed-payment {
+  margin: 0 0 18px;
+  padding: 13px 15px;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  color: var(--navy);
+  font-size: .87rem;
+  line-height: 1.5;
+}
+.sheet-section--conditions .global-discount-control {
+  margin-top: 16px;
+}
+.sheet-section--conditions .global-discount-control__explanation {
+  font-size: .83rem;
+}
+.sheet-section--conditions .lawyer-fee {
+  margin-top: 22px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
