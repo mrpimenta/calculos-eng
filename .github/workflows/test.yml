@@ -2,7 +2,7 @@ name: Verificar calculos do acordo
 
 on:
   push:
-    branches: [main, "fix/acordo-global-20-honorarios-fgts"]
+    branches: [main]
   pull_request:
     branches: [main]
 
