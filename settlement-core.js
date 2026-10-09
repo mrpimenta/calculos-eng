@@ -1,4 +1,4 @@
-/* Motor comum aos dois modelos de acordo; valores arredondados em centavos. */
+/* Acordo fechado: 20% de deságio global, 14% de honorários e pagamento à vista. */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -6,110 +6,92 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const cents = (value) => {
-    const number = Number(value);
-    if (!Number.isFinite(number) || number < 0) {
-      throw new RangeError('Os valores monetários devem ser finitos e não negativos.');
+  const DESAGIO_GLOBAL = 0.20;
+  const HONORARIOS = 0.14;
+  const toCents = (value) => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+      throw new RangeError('Todos os valores devem ser números não negativos.');
     }
-    return Math.round(number * 100 + Number.EPSILON);
+    return Math.round(value * 100 + Number.EPSILON);
   };
-  const reais = (value) => value / 100;
-  const taxa = (value) => {
-    const number = Number(value);
-    return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : 0;
-  };
-  const parcela = (value, fraction) => Math.round(value * fraction);
+  const toReais = (centavos) => centavos / 100;
+  const roundPart = (centavos, rate) => Math.round(centavos * rate);
 
-  /**
-   * tipo: "global" aplica deságio ao bruto inteiro; "juros" apenas aos juros.
-   * Base contratual dos honorários: bruto do acordo, incluindo verbas e FGTS,
-   * excluindo encargos patronais. Honorários inteiros são abatidos do crédito
-   * bancário, pois o FGTS é lançado separadamente na conta vinculada.
-   * O líquido do Blanco mantém seus descontos originais, proporcionalizados
-   * no cenário global: NÃO substitui recálculo de IR/INSS na liquidação.
-   */
-  function simularAcordo(base, percentualDesagio, tipo = 'global') {
-    if (tipo !== 'global' && tipo !== 'juros') {
-      throw new RangeError('Tipo de deságio desconhecido.');
+  function calcularAcordo(base) {
+    if (!base || typeof base !== 'object') {
+      throw new TypeError('Informe os cinco valores da planilha de cálculo.');
     }
 
-    const rate = taxa(percentualDesagio);
-    const advogadoPct = taxa(base.advogadoPct);
-    const valorCorrigido = cents(base.valorCorrigido);
-    const juros = cents(base.juros);
-    const fgtsCorrigido = cents(base.fgtsCorrigido);
-    const fgtsJuros = cents(base.fgtsJuros);
-    const liquidoOriginal = cents(base.liquidoOriginal);
-    const brutoOriginal = valorCorrigido + juros;
+    const corrigido = toCents(base.valorCorrigido);
+    const juros = toCents(base.juros);
+    const fgtsCorrigido = toCents(base.fgtsCorrigido);
+    const fgtsJuros = toCents(base.fgtsJuros);
+    const liquidoOriginal = toCents(base.liquidoOriginal);
+    const brutoOriginal = corrigido + juros;
     const fgtsOriginal = fgtsCorrigido + fgtsJuros;
 
-    if (fgtsCorrigido > valorCorrigido || fgtsJuros > juros ||
-        fgtsOriginal > brutoOriginal || liquidoOriginal > brutoOriginal - fgtsOriginal) {
-      throw new RangeError('As parcelas informadas não conciliam com o bruto original.');
+    if (brutoOriginal === 0) {
+      throw new RangeError('O total original precisa ser maior que zero.');
+    }
+    if (fgtsCorrigido > corrigido || fgtsJuros > juros ||
+        fgtsOriginal > brutoOriginal ||
+        liquidoOriginal > brutoOriginal - fgtsOriginal) {
+      throw new RangeError('Os valores não conciliam: confira total, FGTS e líquido do reclamante.');
     }
 
-    let desagioDireto;
-    let desagioFGTS;
-    let liquidoAntesAdvogado;
-    if (tipo === 'global') {
-      const desagioTotal = parcela(brutoOriginal, rate);
-      desagioFGTS = parcela(fgtsOriginal, rate);
-      desagioDireto = desagioTotal - desagioFGTS;
-      liquidoAntesAdvogado = liquidoOriginal - parcela(liquidoOriginal, rate);
-    } else {
-      desagioFGTS = parcela(fgtsJuros, rate);
-      desagioDireto = parcela(juros - fgtsJuros, rate);
-      liquidoAntesAdvogado = liquidoOriginal - desagioDireto;
-    }
+    // O deságio incide sobre o crédito bruto DO RECLAMANTE (inclusive FGTS),
+    // e não sobre os encargos patronais ou honorários sucumbenciais da APS.
+    const desagioGlobal = roundPart(brutoOriginal, DESAGIO_GLOBAL);
+    const brutoAposDesagio = brutoOriginal - desagioGlobal;
+    const desagioFGTS = roundPart(fgtsOriginal, DESAGIO_GLOBAL);
+    const fgtsVinculado = fgtsOriginal - desagioFGTS;
 
-    const desagioTotal = desagioDireto + desagioFGTS;
-    const brutoAcordo = brutoOriginal - desagioTotal;
-    const fgtsFinal = fgtsOriginal - desagioFGTS;
-    const baseHonorarios = brutoAcordo; // Verbas brutas + FGTS, após o deságio.
-    const honorariosAdvogado = parcela(baseHonorarios, advogadoPct);
-    const honorariosSobreFGTS = parcela(fgtsFinal, advogadoPct);
-    const honorariosSobreVerbas = honorariosAdvogado - honorariosSobreFGTS;
-
-    // A conta vinculada do FGTS recebe seu valor INTEGRAL após o deságio.
-    // A parte dos honorários correspondente ao FGTS é paga pelo crédito direto.
-    const honorariosPendentes = Math.max(0, honorariosAdvogado - liquidoAntesAdvogado);
-    const liquidoFinal = Math.max(0, liquidoAntesAdvogado - honorariosAdvogado);
-    const totalEconomico = liquidoFinal + fgtsFinal - honorariosPendentes;
+    // Estimativa proporcional a partir do líquido já tributado na planilha Blanco.
+    // Não equivale a novo cálculo de IRPF / INSS sobre um acordo homologado.
+    const liquidoAntesHonorarios = liquidoOriginal -
+      roundPart(liquidoOriginal, DESAGIO_GLOBAL);
     const descontosOriginais = brutoOriginal - fgtsOriginal - liquidoOriginal;
-    const descontosEstimados = brutoAcordo - fgtsFinal - liquidoAntesAdvogado;
+    const descontosProporcionais = brutoAposDesagio - fgtsVinculado - liquidoAntesHonorarios;
 
-    const result = {
-      tipo,
-      rate,
-      advogadoPct,
-      fatorPagamento: 1 - rate,
-      brutoOriginal: reais(brutoOriginal),
-      fgtsOriginal: reais(fgtsOriginal),
-      desagioDireto: reais(desagioDireto),
-      desagioFGTS: reais(desagioFGTS),
-      desagioTotal: reais(desagioTotal),
-      desagioGlobal: reais(desagioTotal),
-      brutoAcordo: reais(brutoAcordo),
-      verbasBrutasAposDesagio: reais(brutoAcordo - fgtsFinal),
-      liquidoAntesAdvogado: reais(liquidoAntesAdvogado),
-      baseHonorarios: reais(baseHonorarios),
-      honorariosAdvogado: reais(honorariosAdvogado),
-      honorariosSobreFGTS: reais(honorariosSobreFGTS),
-      honorariosSobreVerbas: reais(honorariosSobreVerbas),
-      honorariosPendentes: reais(honorariosPendentes),
-      liquidoFinal: reais(liquidoFinal),
-      valorEmConta: reais(liquidoFinal),
-      fgtsFinal: reais(fgtsFinal),
-      totalEconomico: reais(totalEconomico),
-      descontosOriginais: reais(descontosOriginais),
-      descontosEstimados: reais(descontosEstimados),
-      percentualBrutoAposHonorarios: brutoOriginal > 0 ? (brutoAcordo - honorariosAdvogado) / brutoOriginal : 0,
-      percentualRecebido: brutoOriginal > 0 ? totalEconomico / brutoOriginal : 0,
-      percentualEmConta: brutoOriginal > 0 ? liquidoFinal / brutoOriginal : 0,
-      percentualFGTS: brutoOriginal > 0 ? fgtsFinal / brutoOriginal : 0
+    // Honorários: 14% do crédito BRUTO após deságio, somando verbas + FGTS.
+    // A parte dos honorários relativa ao FGTS sai das verbas bancárias, sem
+    // subtrair os honorários uma segunda vez do depósito na conta vinculada.
+    const baseHonorarios = brutoAposDesagio;
+    const honorariosTotais = roundPart(baseHonorarios, HONORARIOS);
+    const honorariosSobreFGTS = roundPart(fgtsVinculado, HONORARIOS);
+    const honorariosSobreVerbas = honorariosTotais - honorariosSobreFGTS;
+
+    const naConta = Math.max(0, liquidoAntesHonorarios - honorariosTotais);
+    const honorariosPendentes = Math.max(0, honorariosTotais - liquidoAntesHonorarios);
+    const totalEconomico = naConta + fgtsVinculado - honorariosPendentes;
+
+    return {
+      desagioPct: DESAGIO_GLOBAL,
+      honorariosPct: HONORARIOS,
+      brutoOriginal: toReais(brutoOriginal),
+      fgtsOriginal: toReais(fgtsOriginal),
+      liquidoOriginal: toReais(liquidoOriginal),
+      descontosOriginais: toReais(descontosOriginais),
+      desagioGlobal: toReais(desagioGlobal),
+      brutoAposDesagio: toReais(brutoAposDesagio),
+      verbasBrutasAposDesagio: toReais(brutoAposDesagio - fgtsVinculado),
+      desagioFGTS: toReais(desagioFGTS),
+      fgtsVinculado: toReais(fgtsVinculado),
+      liquidoAntesHonorarios: toReais(liquidoAntesHonorarios),
+      descontosProporcionais: toReais(descontosProporcionais),
+      baseHonorarios: toReais(baseHonorarios),
+      honorariosTotais: toReais(honorariosTotais),
+      honorariosSobreVerbas: toReais(honorariosSobreVerbas),
+      honorariosSobreFGTS: toReais(honorariosSobreFGTS),
+      naConta: toReais(naConta),
+      honorariosPendentes: toReais(honorariosPendentes),
+      totalEconomico: toReais(totalEconomico),
+      percentualNaConta: naConta / brutoOriginal,
+      percentualFGTS: fgtsVinculado / brutoOriginal,
+      percentualTotal: totalEconomico / brutoOriginal,
+      percentualTeorico: (brutoAposDesagio - honorariosTotais) / brutoOriginal
     };
-    return result;
   }
 
-  return { simularAcordo };
+  return Object.freeze({ DESAGIO_GLOBAL, HONORARIOS, calcularAcordo });
 });
