@@ -7,7 +7,6 @@
   <meta name="description" content="Simulador de acordo à vista com deságio global, honorários sobre verbas e FGTS e separação do crédito bancário." />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="enhancements.css" />
-  <link rel="stylesheet" href="investment.css" />
   <link rel="stylesheet" href="global-discount.css" />
 </head>
 <body>
@@ -34,7 +33,7 @@
         <p class="eyebrow">Liquidação trabalhista · apoio à decisão</p>
         <h1 id="page-title">Acordo à vista: veja o valor na conta e no FGTS.</h1>
       </div>
-      <p class="intro__copy">Informe os cinco valores da página 1 do cálculo Blanco. O cenário principal já considera 20% de deságio global, pagamento à vista e honorários de 14% sobre verbas e FGTS. As simulações antigas sobre juros permanecem como comparativo.</p>
+      <p class="intro__copy">Informe os cinco valores da página 1 do cálculo Blanco. O cenário principal já considera 20% de deságio global, pagamento à vista e honorários de 14% sobre verbas e FGTS. A comparação alternativa por deságio somente sobre juros também considera pagamento à vista.</p>
     </section>
 
     <div class="workspace">
@@ -141,31 +140,29 @@
           <div class="sheet-section__heading">
             <div class="step-index" aria-hidden="true">03</div>
             <div>
-              <p class="section-source">Comparação alternativa · desconto apenas nos juros</p>
-              <h3 id="condicoes-title">Simule também os critérios antigos</h3>
+              <p class="section-source">Condições do acordo</p>
+              <h3 id="condicoes-title">Pagamento único à vista</h3>
             </div>
           </div>
 
-          <div class="condition-grid">
-            <div>
-              <label class="control-label" for="parcelas">Parcelas no comparativo sobre juros</label>
-              <select id="parcelas"></select>
-              <div id="scenarioQuick" class="quick-scenarios" aria-label="Atalhos de parcelamento">
-                <button type="button" data-parcelas="1">À vista</button>
-                <button type="button" data-parcelas="12">12x</button>
-                <button type="button" data-parcelas="14">14x</button>
-                <button type="button" data-parcelas="24">24x</button>
-              </div>
-            </div>
-            <div>
-              <label class="control-label" for="taxaAnual">Taxa anual de referência</label>
-              <div class="percent-input">
-                <input id="taxaAnual" inputmode="decimal" value="15,00" />
-                <span>% a.a.</span>
-              </div>
-              <small class="control-help">Usada no valor presente e, abaixo, como rentabilidade líquida estimada de renda fixa.</small>
-            </div>
+          <p class="fixed-payment"><strong>Forma de pagamento:</strong> à vista. O simulador considera um único recebimento, sem prazo de espera ou descontos financeiros por antecipação.</p>
+      <div class="global-discount-control">
+        <div>
+          <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
+          <div class="percent-input global-discount-rate-input">
+            <input id="globalBaseDiscountRate" inputmode="decimal" value="20,00" autocomplete="off" aria-describedby="globalBaseDiscountHelp" />
+            <span>%</span>
           </div>
+          <small id="globalBaseDiscountHelp" class="control-help">Digite qualquer percentual entre 0% e 100% ou use um dos atalhos abaixo.</small>
+          <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
+            <button type="button" data-global-rate="15">15%</button>
+            <button type="button" data-global-rate="20">20%</button>
+            <button type="button" data-global-rate="30">30%</button>
+            <button type="button" data-global-rate="50">50%</button>
+          </div>
+        </div>
+        <p class="global-discount-control__explanation"><strong>Base contratual:</strong> verbas brutas e FGTS após o deságio global. Os honorários são pagos integralmente a partir do crédito bancário, inclusive sua parcela referente ao FGTS. O valor proporcional do FGTS segue separado para a conta vinculada. A estimativa preserva os descontos já incorporados ao líquido informado no Blanco, sem recalcular os tributos.</p>
+      </div>
 
           <div class="lawyer-fee">
             <div class="lawyer-fee__copy">
@@ -183,26 +180,6 @@
             </div>
           </div>
 
-          <div class="rule-strip" aria-label="Faixas de deságio usadas pelo simulador">
-            <div><strong>À vista</strong><span>70% sobre juros</span></div>
-            <div><strong>2 a 12 parcelas</strong><span>50% sobre juros</span></div>
-            <div><strong>13 a 24 parcelas</strong><span>30% sobre juros</span></div>
-          </div>
-
-          <div class="company-discount-summary" aria-live="polite">
-            <div class="company-discount-summary__copy">
-              <p class="section-source">Resumo do efeito do acordo</p>
-              <strong>Deságio global estimado da APS</strong>
-              <small>Indicador exclusivo da modalidade alternativa sobre juros. A proposta principal de 20% sobre o crédito global é mostrada no painel à direita.</small>
-            </div>
-            <div class="company-discount-summary__value">
-              <strong id="globalDiscountPct">—</strong>
-              <span id="globalDiscountAmount">—</span>
-              <small id="companyPaidPct">—</small>
-            </div>
-          </div>
-
-          <p class="norm-note">Nos parcelamentos, considere também a condição normativa de vencimento da primeira parcela prevista no acordo.</p>
         </section>
 
         <div id="validation" class="validation validation--neutral" role="status" aria-live="polite">
@@ -233,7 +210,7 @@
         <details class="legacy-results">
           <summary>Ver resultado alternativo: deságio somente sobre juros</summary>
         <div class="result-panel__topline">
-          <p class="result-kicker">Cenário selecionado</p>
+          <p class="result-kicker">Cenário alternativo · à vista</p>
           <span id="ruleBadge" class="rule-badge">Aguardando preenchimento</span>
         </div>
 
@@ -251,10 +228,6 @@
         </div>
 
         <div class="result-ledger">
-          <div>
-            <span>Parcela líquida final</span>
-            <strong id="parcelaMedia">—</strong>
-          </div>
           <div>
             <span>Honorários do advogado</span>
             <strong id="honorariosAdvogado">—</strong>
@@ -275,10 +248,6 @@
             <span>Total econômico alternativo · conta + FGTS</span>
             <strong id="totalEconomico">—</strong>
           </div>
-          <div class="result-ledger__wide result-ledger__muted">
-            <span>Valor presente do líquido final</span>
-            <strong id="valorPresente">—</strong>
-          </div>
         </div>
 
         </details>
@@ -291,28 +260,11 @@
       <div class="global-discount-analysis__header">
         <div>
           <p class="eyebrow">Proposta definida · à vista</p>
-          <h2 id="global-discount-title">Acordo global: 20% de deságio + 14% de honorários</h2>
+          <h2 id="global-discount-title">Detalhamento do acordo à vista</h2>
         </div>
-        <p>O pagamento é à vista. Primeiro descontam-se 20% do crédito bruto (verbas + FGTS); depois, 14% de honorários sobre a base bruta remanescente, inclusive FGTS. Os percentuais podem ser alterados para comparação, sem cumular o deságio sobre juros.</p>
+        <p>O pagamento é integralmente à vista. Primeiro aplica-se o deságio global informado sobre verbas e FGTS; depois incidem os honorários contratuais sobre o bruto remanescente, incluindo FGTS. O resultado discrimina conta bancária, FGTS e percentual recebido.</p>
       </div>
 
-      <div class="global-discount-control">
-        <div>
-          <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
-          <div class="percent-input global-discount-rate-input">
-            <input id="globalBaseDiscountRate" inputmode="decimal" value="20,00" autocomplete="off" aria-describedby="globalBaseDiscountHelp" />
-            <span>%</span>
-          </div>
-          <small id="globalBaseDiscountHelp" class="control-help">Digite qualquer percentual entre 0% e 100% ou use um dos atalhos abaixo.</small>
-          <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
-            <button type="button" data-global-rate="15">15%</button>
-            <button type="button" data-global-rate="20">20%</button>
-            <button type="button" data-global-rate="30">30%</button>
-            <button type="button" data-global-rate="50">50%</button>
-          </div>
-        </div>
-        <p class="global-discount-control__explanation"><strong>Base contratual:</strong> verbas brutas e FGTS após o deságio global. Os honorários são pagos integralmente a partir do crédito bancário, inclusive sua parcela referente ao FGTS. O valor proporcional do FGTS segue separado para a conta vinculada. A estimativa preserva os descontos já incorporados ao líquido informado no Blanco, sem recalcular os tributos.</p>
-      </div>
 
       <div class="global-discount-summary" aria-live="polite">
         <div><span>Deságio global aplicado</span><strong id="wholeGlobalRate">—</strong></div>
@@ -360,122 +312,17 @@
       </details>
     </section>
 
-    <section class="comparison" aria-labelledby="comparison-title">
-      <div class="section-headline">
-        <div>
-          <p class="eyebrow">Módulo alternativo mantido</p>
-          <h2 id="comparison-title">Comparação por desconto somente sobre juros</h2>
-        </div>
-        <p>Os honorários incidem sobre o crédito bruto após o deságio de juros, incluindo FGTS. Estes cenários não se acumulam com o acordo global de 20%.</p>
-      </div>
-
-      <div class="table-shell">
-        <table>
-          <thead>
-            <tr>
-              <th>Modalidade</th>
-              <th>Deságio APS</th>
-              <th>Advogado</th>
-              <th>Líquido final</th>
-              <th>Parcela líquida</th>
-              <th>FGTS</th>
-              <th>Valor presente</th>
-            </tr>
-          </thead>
-          <tbody id="compareBody">
-            <tr><td colspan="7" class="empty-row">Preencha os dados essenciais para comparar as modalidades.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-
     <details class="calculation-memory">
       <summary>
         <span>
           <small>Transparência do cálculo</small>
-          <strong>Ver memória de cálculo</strong>
+          <strong>Ver memória da alternativa à vista sobre juros</strong>
         </span>
         <span aria-hidden="true">+</span>
       </summary>
       <div id="memory" class="memory-grid"></div>
     </details>
 
-    <section class="investment-analysis" aria-labelledby="investment-title">
-      <div class="investment-analysis__header">
-        <div>
-          <p class="eyebrow">Vantajosidade financeira</p>
-          <h2 id="investment-title">E se cada parcela recebida for aplicada em renda fixa?</h2>
-        </div>
-        <p>Esta análise fica abaixo de todo o cálculo e compara as modalidades no mesmo horizonte de 24 meses. Assim, o benefício de receber antes pode ser confrontado com o benefício de aceitar menos deságio.</p>
-      </div>
-
-      <div class="investment-assumptions" aria-label="Premissas da comparação de renda fixa">
-        <div>
-          <span>Rentabilidade usada</span>
-          <strong id="investmentRateDisplay">—</strong>
-        </div>
-        <div>
-          <span>Horizonte comum</span>
-          <strong>24 meses</strong>
-        </div>
-        <div>
-          <span>Fluxo considerado</span>
-          <strong>1º recebimento no mês 1</strong>
-        </div>
-      </div>
-
-      <div class="investment-visual">
-        <div class="investment-visual__head">
-          <h3>Patrimônio acumulado no fim do mês 24</h3>
-          <p>Somente o líquido direto após advogado é reinvestido; FGTS fica fora desta comparação.</p>
-        </div>
-        <div id="investmentChart" class="investment-chart" aria-live="polite">
-          <p class="investment-empty">A comparação gráfica aparecerá aqui quando os dados estiverem completos.</p>
-        </div>
-      </div>
-
-      <div class="advantage-verdict">
-        <div class="advantage-verdict__winner">
-          <span>Melhor modalidade na taxa informada</span>
-          <strong id="investmentBestScenario">—</strong>
-          <b id="investmentBestValue">—</b>
-          <small id="investmentBestDelta">—</small>
-        </div>
-        <div class="advantage-verdict__explanation">
-          <p id="investmentSelectedVerdict">Preencha os cinco valores do Blanco para gerar a análise.</p>
-          <p class="break-even"><strong>Taxa de equilíbrio do cenário selecionado vs. à vista:</strong> <span id="investmentBreakEven">—</span></p>
-        </div>
-      </div>
-
-      <div class="investment-ranking">
-        <div class="investment-ranking__headline">
-          <h3>Comparação de modalidades-chave</h3>
-          <p>O sistema também testa internamente todas as opções de 1 a 24 parcelas para apontar a melhor.</p>
-        </div>
-
-        <div class="table-shell">
-          <table>
-            <thead>
-              <tr>
-                <th>Modalidade</th>
-                <th>Líquido nominal</th>
-                <th>Rendimento acumulado</th>
-                <th>Patrimônio no mês 24</th>
-                <th>Diferença para a melhor</th>
-                <th>Equilíbrio vs. à vista</th>
-              </tr>
-            </thead>
-            <tbody id="investmentBody">
-              <tr><td colspan="6" class="empty-row">Preencha os dados para comparar a vantajosidade financeira.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p class="investment-top3"><strong>Top 3 entre 1 e 24 parcelas:</strong> <span id="investmentTop3">—</span></p>
-        <p class="investment-footnote">Premissa financeira: a taxa anual informada é tratada como rentabilidade líquida efetiva e constante. Não são modelados IR/IOF da aplicação, taxas, inflação, risco de crédito ou variações futuras da taxa. Cada parcela líquida é considerada recebida no fim do respectivo mês e reinvestida até o mês 24.</p>
-      </div>
-    </section>
   </main>
 
   <footer class="footer shell">
@@ -486,6 +333,5 @@
   <script src="settlement-core.js"></script>
   <script src="app.js"></script>
   <script src="global-discount.js"></script>
-  <script src="investment.js"></script>
 </body>
 </html>
