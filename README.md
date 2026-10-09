@@ -47,17 +47,20 @@ Para preservar consistência, o motor usa arredondamento em centavos a cada etap
 
 **Atenção:** a proporcionalização do líquido do Blanco mantém os descontos já refletidos na planilha original. **Não é recálculo tributário**: IRPF, contribuição previdenciária, retenções, eventual quitação de FGTS ou ajustes próprios do termo do acordo precisam ser confirmados na liquidação. Os percentuais do deságio e do advogado podem ser alterados na interface, mas começam em **20%** e **14%**.
 
-## Módulos preservados (não cumulativos)
+## Comparação alternativa: desconto sobre juros, à vista
 
-O simulador também mantém o modelo alternativo de **deságio somente sobre juros**:
+Além do acordo global (20% sobre o bruto), permanece disponível uma **comparação alternativa, também à vista**, em seção recolhida:
 
-- 1 parcela: 70% sobre juros;
-- 2 a 12 parcelas: 50% sobre juros;
-- 13 a 24 parcelas: 30% sobre juros.
+- Deságio de **70% somente sobre os juros**, inclusive a parcela de juros de FGTS.
+- Honorários de **14% sobre o crédito bruto remanescente (verbas + FGTS)**, abatidos do pagamento direto.
+- Resultado destacado por recebimento bancário, FGTS e total econômico.
+- Memória de cálculo separada. **Os dois modelos de deságio não são cumulativos.**
 
-Esse modelo permanece independente do desconto global. Os honorários contratuais em **todos** os comparativos incidem sobre o crédito bruto após o deságio, incluindo FGTS, e são pagos com as verbas diretas. Também permanecem disponíveis a comparação entre 1 a 24 parcelas, valor presente, análise de aplicações em renda fixa e memória de cálculo.
+Não existem seleção de prazos, cronograma de depósitos, projeção de parcelas, valor presente ou comparação de aplicação financeira. O simulador **sempre considera pagamento à vista**.
 
-O módulo global permite testar 15%, 20%, 30%, 50% ou uma taxa digitada entre 0% e 100%. O desconto global não é somado ao deságio sobre juros.
+## Percentuais editáveis no acordo global
+
+O acordo principal começa em **20% de deságio global** e **14% de honorários contratuais**, mas os campos são editáveis para testar cenários. O desconto global aceita 15%, 20%, 30%, 50% ou percentual digitado entre 0% e 100%. Todas as simulações do desconto global são à vista.
 
 ## Execução e verificação
 
