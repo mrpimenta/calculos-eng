@@ -1,75 +1,58 @@
-# Cálculos Eng — Simulador de Acordo APS
+# Cálculos Eng — acordo fechado dos engenheiros APS
 
-Aplicação web estática para comparar propostas de acordo dos engenheiros da Autoridade Portuária de Santos (APS), usando **cinco campos da primeira página do cálculo Blanco**. Os valores são processados apenas no navegador.
+Calculadora estática do **acordo informado como fechado**, para estimar quanto será pago **à vista na conta bancária** e quanto será destinado **à conta vinculada do FGTS**. A interface possui **somente cinco entradas financeiras** da primeira página do cálculo Blanco; os percentuais e a forma de pagamento não podem ser alterados.
 
-## Proposta principal: pagamento à vista
+## Condições fixas
 
-- **20% de deságio global** sobre o crédito bruto do reclamante, incluindo verbas + FGTS.
-- **14% de honorários contratuais** sobre o crédito **bruto remanescente após o deságio**, incluindo verbas + FGTS.
-- Os honorários contratuais são abatidos **integralmente do crédito bancário**; a parte calculada sobre FGTS também é descontada do dinheiro depositado diretamente.
-- O **FGTS após o deságio** é mostrado separadamente, para a **conta vinculada do FGTS**. Não é presumido saque livre ou recebimento na conta corrente.
-- O resumo exibe: **valor a cair na conta bancária**, **FGTS**, **total econômico líquido**, **percentual efetivamente recebido do bruto original**, **honorários** e **deságio da APS**.
+- Deságio de **20% sobre o crédito bruto global** do reclamante (verbas + FGTS).
+- Honorários contratuais de **14% sobre o bruto remanescente**, incluídas as verbas e o FGTS.
+- Honorários totais abatidos do **recebimento direto bancário**; a parcela correspondente ao FGTS também é paga pelo crédito direto, sem reduzir duas vezes o depósito de FGTS.
+- Pagamento **único à vista**. Não há seleção de parcelamento, deságio sobre juros, outras taxas de deságio, investimento ou cenários alternativos.
 
-Com 20% de deságio e 14% de honorários, a retenção **teórica bruta** é `80% × 86% = 68,8%` do valor original. O percentual líquido real da simulação pode ser menor, porque o campo "Líquido Devido ao Reclamante" já incorpora descontos do cálculo-fonte (como IRPF).
+O FGTS é indicado separadamente como depósito na **conta vinculada**, sem presumir saque imediato ou depósito em conta bancária.
 
-## Cinco valores copiados do Blanco
+## Origem dos cinco valores (página 1 da planilha Blanco)
 
-1. "Total" → "Valor Corrigido" (quadro Resumo do Cálculo).
-2. "Total" → "Juros" (quadro Resumo do Cálculo).
-3. "FGTS 8%" → "Valor Corrigido".
-4. "FGTS 8%" → "Juros".
-5. "Líquido Devido ao Reclamante" (quadro Descrição de Créditos e Descontos do Reclamante).
+1. Quadro "Resumo do Cálculo" → linha "Total" → coluna "Valor Corrigido".
+2. Quadro "Resumo do Cálculo" → linha "Total" → coluna "Juros".
+3. Quadro "Resumo do Cálculo" → linha "FGTS 8%" → coluna "Valor Corrigido".
+4. Quadro "Resumo do Cálculo" → linha "FGTS 8%" → coluna "Juros".
+5. Quadro "Descrição de Créditos e Descontos do Reclamante" → "Líquido Devido ao Reclamante".
 
-Não copiar o **Total Devido pelo Reclamado** nem os honorários de sucumbência para a base contratual: o total do reclamado também inclui encargos patronais e/ou rubricas de outros credores, fora do crédito bruto do reclamante.
+**Não** usar o "Total Devido pelo Reclamado", que inclui também rubricas de outros credores/encargos patronais, nem incorporar honorários de sucumbência à base contratual.
 
-## Memória de cálculo — cenário global
+## Cálculo
 
-```text
-Bruto original = Total Valor Corrigido + Total Juros
-FGTS original = FGTS Valor Corrigido + FGTS Juros
+    Bruto original = Total corrigido + Total juros
+    FGTS original = FGTS corrigido + FGTS juros
 
-Deságio da APS = 20% × Bruto original
-Crédito bruto do acordo = Bruto original − Deságio da APS
-FGTS após deságio = FGTS original × 80%
-Líquido direto estimado antes do advogado = Líquido original × 80%
+    Deságio global = 20% × Bruto original
+    Bruto após deságio = Bruto original − Deságio global
 
-Base dos honorários = Crédito bruto do acordo (verbas brutas + FGTS)
-Honorários = 14% × Base dos honorários
-Honorários correspondentes ao FGTS = 14% × FGTS após deságio
+    FGTS vinculado = FGTS original − (20% × FGTS original)
+    Direto antes dos honorários = Líquido original − (20% × Líquido original)
 
-Na conta bancária = Líquido direto após deságio − TODOS os honorários
-FGTS vinculado = FGTS após deságio (não subtrair honorários novamente)
-Total econômico líquido = Na conta bancária + FGTS vinculado
-Percentual recebido = Total econômico líquido ÷ Bruto original
-```
+    Base honorários = Bruto após deságio (verbas + FGTS)
+    Honorários contratuais = 14% × Base honorários
 
-Para preservar consistência, o motor usa arredondamento em centavos a cada etapa. Se o crédito bancário for insuficiente para pagar os honorários, o simulador zera o depósito bancário, mostra o saldo pendente e o abate do total econômico.
+    Na conta bancária = Direto antes dos honorários − Honorários contratuais
+    Total econômico líquido = Na conta bancária + FGTS vinculado
+    Percentual líquido = Total econômico líquido / Bruto original
 
-**Atenção:** a proporcionalização do líquido do Blanco mantém os descontos já refletidos na planilha original. **Não é recálculo tributário**: IRPF, contribuição previdenciária, retenções, eventual quitação de FGTS ou ajustes próprios do termo do acordo precisam ser confirmados na liquidação. Os percentuais do deságio e do advogado podem ser alterados na interface, mas começam em **20%** e **14%**.
+O motor usa valores inteiros em centavos internamente, arredondados em cada etapa. Se o crédito bancário não cobrir os honorários, o aplicativo informa o saldo pendente e o desconta do total econômico, sem exibir depósito bancário negativo.
 
-## Comparação alternativa: desconto sobre juros, à vista
+A retenção bruta **teórica**, sem as retenções já existentes na planilha, é de **68,80%** do bruto original (80% × 86%). O percentual econômico efetivo pode ser menor porque o "Líquido Devido ao Reclamante" já contém descontos, como IRPF.
 
-Além do acordo global (20% sobre o bruto), permanece disponível uma **comparação alternativa, também à vista**, em seção recolhida:
+**Limitação importante:** este cálculo proporcionaliza os descontos já refletidos no líquido original; **não recalcula IRPF/INSS nem substitui a liquidação jurídica ou contábil**. A natureza, a tributação e a forma de quitação de FGTS precisam ser confirmadas conforme o termo do acordo.
 
-- Deságio de **70% somente sobre os juros**, inclusive a parcela de juros de FGTS.
-- Honorários de **14% sobre o crédito bruto remanescente (verbas + FGTS)**, abatidos do pagamento direto.
-- Resultado destacado por recebimento bancário, FGTS e total econômico.
-- Memória de cálculo separada. **Os dois modelos de deságio não são cumulativos.**
+## Execução e testes
 
-Não existem seleção de prazos, cronograma de depósitos, projeção de parcelas, valor presente ou comparação de aplicação financeira. O simulador **sempre considera pagamento à vista**.
+A aplicação funciona localmente abrindo o arquivo index.html, sem servidor nem armazenamento de dados. O repositório contém somente o motor fixo settlement-core.js, a interface app.js e o estilo principal styles.css.
 
-## Percentuais editáveis no acordo global
+Node.js 22+ para testar:
 
-O acordo principal começa em **20% de deságio global** e **14% de honorários contratuais**, mas os campos são editáveis para testar cenários. O desconto global aceita 15%, 20%, 30%, 50% ou percentual digitado entre 0% e 100%. Todas as simulações do desconto global são à vista.
+    node --check settlement-core.js
+    node --check app.js
+    node --test tests/*.test.cjs
 
-## Execução e verificação
-
-Aplicação estática: abra `index.html` ou publique a raiz do repositório em hospedagem estática. Não há necessidade de servidor de API, login ou banco de dados.
-
-Requer Node.js 22+ somente para executar os testes:
-
-```bash
-node --test tests/*.test.cjs
-```
-
-Os testes automáticos cobrem arredondamento monetário, honorários sobre FGTS, depósito bancário, percentuais, tratamento de saldo pendente, comparação não cumulativa e integração entre os módulos da interface.
+Os testes usam apenas números fictícios e validam percentuais imutáveis, FGTS e honorários, depósito bancário, total recebido, validação e preenchimento dos cinco campos.

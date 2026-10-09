@@ -1,195 +1,156 @@
 'use strict';
 
-// Os dois métodos são à vista. Este módulo mantém apenas a comparação
-// alternativa de deságio sobre juros; o acordo global é o resultado principal.
-const $ = (id) => document.getElementById(id);
+(() => {
+  const ids = ['valorCorrigido', 'juros', 'fgtsCorrigido', 'fgtsJuros', 'liquidoOriginal'];
+  const $ = (id) => document.getElementById(id);
+  const money = (value) => new Intl.NumberFormat('pt-BR', {
+    style: 'currency', currency: 'BRL'
+  }).format(value);
+  const formatInput = (value) => new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  }).format(value);
+  const percent = (value) => new Intl.NumberFormat('pt-BR', {
+    style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2
+  }).format(value);
 
-const requiredIds = [
-  'valorCorrigido',
-  'juros',
-  'fgtsCorrigido',
-  'fgtsJuros',
-  'liquidoOriginal'
-];
-const watchedIds = [...requiredIds, 'advogadoPct'];
-
-function parseBR(value) {
-  if (typeof value !== 'string') return Number(value) || 0;
-  const s = value.trim().replace(/\s/g, '').replace(/R\$/gi, '');
-  if (!s) return 0;
-  const normalized = s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s;
-  const n = Number(normalized);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function money(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value || 0);
-}
-
-function fmtInput(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value || 0);
-}
-
-function percent(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'percent',
-    maximumFractionDigits: 2
-  }).format(value || 0);
-}
-
-function readBase() {
-  return {
-    valorCorrigido: parseBR($('valorCorrigido').value),
-    juros: parseBR($('juros').value),
-    fgtsCorrigido: parseBR($('fgtsCorrigido').value),
-    fgtsJuros: parseBR($('fgtsJuros').value),
-    liquidoOriginal: parseBR($('liquidoOriginal').value),
-    advogadoPct: Math.min(1, Math.max(0, parseBR($('advogadoPct').value) / 100))
-  };
-}
-
-function filledCount() {
-  return requiredIds.filter((id) => $(id).value.trim() !== '').length;
-}
-
-function isComplete() {
-  return filledCount() === requiredIds.length;
-}
-
-function renderProgress() {
-  $('requiredProgress').textContent = filledCount() + '/' + requiredIds.length;
-}
-
-function renderValidation(base) {
-  const box = $('validation');
-
-  if (!isComplete()) {
-    const missing = requiredIds.length - filledCount();
-    box.className = 'validation validation--neutral';
-    box.innerHTML = '<strong>Faltam ' + missing + ' ' +
-      (missing === 1 ? 'campo' : 'campos') +
-      '.</strong> Copie somente os valores indicados na página 1 do cálculo.';
-    return false;
-  }
-
-  const warnings = [];
-  if (requiredIds.some((id) => base[id] < 0)) {
-    warnings.push('Os valores monetários não podem ser negativos.');
-  }
-  if (base.fgtsJuros > base.juros) {
-    warnings.push('Os juros do FGTS superam os juros totais.');
-  }
-  if (base.fgtsCorrigido > base.valorCorrigido) {
-    warnings.push('O FGTS corrigido supera o valor corrigido total.');
-  }
-  if (base.fgtsCorrigido + base.fgtsJuros + base.liquidoOriginal >
-      base.valorCorrigido + base.juros + 0.01) {
-    warnings.push('A soma do FGTS e do líquido supera o crédito bruto.');
-  }
-  const pctAdv = parseBR($('advogadoPct').value);
-  if (pctAdv < 0 || pctAdv > 100) {
-    warnings.push('O percentual do advogado deve ficar entre 0% e 100%.');
-  }
-
-  if (warnings.length) {
-    box.className = 'validation validation--warning';
-    box.innerHTML = '<strong>Revise os dados.</strong> ' + warnings.join(' ');
-    return false;
-  }
-  box.className = 'validation validation--success';
-  box.innerHTML = '<strong>Dados completos.</strong> Pagamento à vista. ' +
-    'A proposta principal usa deságio global e honorários sobre verbas e FGTS.';
-  return true;
-}
-
-function clearAlternative() {
-  [
-    'liquido', 'preLawyerValue', 'honorariosAdvogado',
-    'fgtsFinal', 'desagio', 'brutoAcordo', 'totalEconomico'
-  ].forEach((id) => { $(id).textContent = '—'; });
-
-  $('originalValue').textContent = $('liquidoOriginal').value.trim()
-    ? money(parseBR($('liquidoOriginal').value))
-    : '—';
-  $('memory').innerHTML = '';
-}
-
-function renderAlternative(base) {
-  const rate = 0.70; // Comparativo sobre juros também é sempre à vista.
-  const r = window.CalculosEngCalc.simularAcordo(base, rate, 'juros');
-
-  $('ruleBadge').textContent = 'À vista · ' + percent(rate) +
-    ' de deságio sobre juros · advogado ' + percent(base.advogadoPct) +
-    ' sobre verbas e FGTS';
-  $('liquido').textContent = money(r.valorEmConta);
-  $('preLawyerValue').textContent = money(r.liquidoAntesAdvogado);
-  $('originalValue').textContent = money(base.liquidoOriginal);
-  $('honorariosAdvogado').textContent = money(r.honorariosAdvogado);
-  $('fgtsFinal').textContent = money(r.fgtsFinal);
-  $('desagio').textContent = money(r.desagioTotal);
-  $('brutoAcordo').textContent = money(r.brutoAcordo);
-  $('totalEconomico').textContent = money(r.totalEconomico);
-
-  const items = [
-    ['Valor Corrigido original', base.valorCorrigido],
-    ['Juros totais originais', base.juros],
-    ['FGTS original corrigido', base.fgtsCorrigido],
-    ['Juros originais do FGTS', base.fgtsJuros],
-    ['Líquido original do reclamante', base.liquidoOriginal],
-    ['Deságio sobre juros do pagamento direto', r.desagioDireto],
-    ['Deságio sobre juros do FGTS', r.desagioFGTS],
-    ['Total do deságio sobre juros', r.desagioTotal],
-    ['Crédito bruto após deságio', r.brutoAcordo],
-    ['Base de honorários (verbas + FGTS)', r.baseHonorarios],
-    ['Honorários totais', r.honorariosAdvogado],
-    ['Honorários sobre FGTS pagos a partir do crédito direto', r.honorariosSobreFGTS],
-    ['Líquido bancário à vista', r.valorEmConta],
-    ['FGTS vinculado', r.fgtsFinal],
-    ['Total econômico do comparativo à vista', r.totalEconomico]
+  const outputIds = [
+    'resultBank', 'resultFGTS', 'resultTotal', 'resultPercent',
+    'resultGross', 'resultDiscount', 'resultGrossAfter',
+    'resultFeeBase', 'resultFee', 'resultFeeFGTS',
+    'resultDirectBeforeFee', 'resultTaxEstimate', 'resultPercentGross'
   ];
 
-  $('memory').innerHTML = items.map(([label, value]) =>
-    '<div class="memory-item"><span>' + label +
-    '</span><strong>' + money(value) + '</strong></div>'
-  ).join('');
-}
+  function parseBR(value) {
+    const s = String(value).trim().replace(/^R\$\s*/, '').replace(/\s/g, '');
+    if (!s || !/^\d[\d.,]*$/.test(s)) {
+      throw new RangeError('Use números positivos em reais (por exemplo: 1.234,56).');
+    }
 
-function render() {
-  const base = readBase();
-  renderProgress();
+    let n;
+    if (s.includes(',')) {
+      if (s.split(',').length !== 2 || !/,\d{1,2}$/.test(s)) {
+        throw new RangeError('Use no máximo duas casas decimais.');
+      }
+      n = Number(s.replace(/\./g, '').replace(',', '.'));
+    } else if ((s.match(/\./g) || []).length === 1 && /\.\d{1,2}$/.test(s)) {
+      n = Number(s); // Também aceita 1234.56 sem separador de milhar.
+    } else {
+      n = Number(s.replace(/\./g, ''));
+    }
 
-  if (!renderValidation(base)) {
-    $('ruleBadge').textContent = isComplete()
-      ? 'Verifique os dados da planilha'
-      : 'Aguardando preenchimento';
-    clearAlternative();
-    return;
+    if (!Number.isFinite(n) || n < 0) {
+      throw new RangeError('Confira os valores monetários informados.');
+    }
+    return n;
   }
 
-  try {
-    renderAlternative(base);
-  } catch (error) {
-    $('ruleBadge').textContent = 'Verifique os valores informados';
-    clearAlternative();
-    $('validation').className = 'validation validation--warning';
-    $('validation').textContent = 'Não foi possível calcular: ' + error.message;
+  function filledCount() {
+    return ids.filter((id) => $(id).value.trim() !== '').length;
   }
-}
 
-document.querySelectorAll('[data-money]').forEach((input) => {
-  input.addEventListener('blur', () => {
-    if (!input.value.trim()) return;
-    input.value = fmtInput(parseBR(input.value));
-    render();
+  function clearResults() {
+    outputIds.forEach((id) => { $(id).textContent = '—'; });
+    $('balanceWarning').textContent = '';
+    $('memory').innerHTML =
+      '<p class="memory-empty">Preencha os cinco valores para visualizar a memória.</p>';
+  }
+
+  function renderMemory(r) {
+    const rows = [
+      ['Crédito bruto original (verbas + FGTS)', r.brutoOriginal],
+      ['FGTS original', r.fgtsOriginal],
+      ['Líquido direto original do Blanco', r.liquidoOriginal],
+      ['Descontos já considerados no Blanco', r.descontosOriginais],
+      ['Deságio global da APS — 20%', -r.desagioGlobal],
+      ['Crédito bruto remanescente após o deságio', r.brutoAposDesagio],
+      ['Verbas brutas remanescentes sem FGTS', r.verbasBrutasAposDesagio],
+      ['FGTS destinado à conta vinculada após deságio', r.fgtsVinculado],
+      ['Líquido direto antes dos honorários (estimado)', r.liquidoAntesHonorarios],
+      ['Descontos originais proporcionalizados (sem recalcular IR/INSS)', r.descontosProporcionais],
+      ['Base dos honorários (verbas + FGTS após deságio)', r.baseHonorarios],
+      ['Honorários sobre as verbas', -r.honorariosSobreVerbas],
+      ['Honorários sobre o FGTS, abatidos do crédito direto', -r.honorariosSobreFGTS],
+      ['Honorários contratuais totais — 14%', -r.honorariosTotais],
+      ['Depósito estimado na conta bancária, à vista', r.naConta],
+      ['FGTS na conta vinculada', r.fgtsVinculado],
+      ['Total econômico líquido (bancário + FGTS)', r.totalEconomico]
+    ];
+    $('memory').innerHTML = rows.map(([label, amount]) =>
+      '<div class="memory-item"><span>' + label + '</span><strong>' +
+      money(amount) + '</strong></div>'
+    ).join('');
+  }
+
+  function render() {
+    const count = filledCount();
+    $('requiredProgress').textContent = count + '/5';
+    const validation = $('validation');
+    if (count < ids.length) {
+      clearResults();
+      validation.className = 'validation validation--neutral';
+      validation.textContent = 'Faltam ' + (ids.length - count) +
+        ((ids.length - count) === 1 ? ' campo.' : ' campos.') +
+        ' Complete os cinco valores do Blanco.';
+      return;
+    }
+
+    try {
+      const base = {};
+      ids.forEach((id) => { base[id] = parseBR($(id).value); });
+      const r = window.CalculosEngCalc.calcularAcordo(base);
+      const values = {
+        resultBank: money(r.naConta),
+        resultFGTS: money(r.fgtsVinculado),
+        resultTotal: money(r.totalEconomico),
+        resultPercent: percent(r.percentualTotal),
+        resultGross: money(r.brutoOriginal),
+        resultDiscount: money(r.desagioGlobal),
+        resultGrossAfter: money(r.brutoAposDesagio),
+        resultFeeBase: money(r.baseHonorarios),
+        resultFee: money(r.honorariosTotais),
+        resultFeeFGTS: money(r.honorariosSobreFGTS),
+        resultDirectBeforeFee: money(r.liquidoAntesHonorarios),
+        resultTaxEstimate: money(r.descontosProporcionais),
+        resultPercentGross: percent(r.percentualTeorico)
+      };
+      Object.entries(values).forEach(([id, value]) => {
+        $(id).textContent = value;
+      });
+      $('balanceWarning').textContent = r.honorariosPendentes > 0
+        ? 'Atenção: o crédito direto não cobre todos os honorários. Saldo a quitar: ' +
+          money(r.honorariosPendentes) + '. O total econômico já considera esse valor.'
+        : '';
+
+      validation.className = 'validation validation--success';
+      validation.textContent = 'Dados conciliados. Cálculo efetuado com 20% de deságio global, 14% de honorários sobre verbas e FGTS e pagamento à vista.';
+      renderMemory(r);
+    } catch (error) {
+      clearResults();
+      validation.className = 'validation validation--warning';
+      validation.textContent = 'Confira os cinco valores: ' + error.message;
+    }
+  }
+
+  ids.forEach((id) => {
+    const input = $(id);
+    input.addEventListener('input', render);
+    input.addEventListener('change', render);
+    input.addEventListener('blur', () => {
+      if (!input.value.trim()) return;
+      try {
+        input.value = formatInput(parseBR(input.value));
+        render();
+      } catch {
+        // Mantém o texto digitado para que o usuário possa corrigi-lo.
+      }
+    });
   });
-});
 
-watchedIds.forEach((id) => $(id).addEventListener('input', render));
-$('printBtn').addEventListener('click', () => window.print());
-render();
+  $('clearBtn').addEventListener('click', () => {
+    ids.forEach((id) => { $(id).value = ''; });
+    render();
+    $('valorCorrigido').focus();
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+  render();
+})();
