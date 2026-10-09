@@ -1,4 +1,4 @@
-name: Verificar calculos do acordo
+name: Verificar calculos do acordo fechado
 
 on:
   push:
@@ -14,10 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Sintaxe dos scripts
+      - name: Conferir sintaxe
         run: |
           node --check settlement-core.js
           node --check app.js
-          node --check global-discount.js
-      - name: Testes financeiros e de interface
+      - name: Testar calculo financeiro e interface
         run: node --test tests/*.test.cjs
