@@ -1,85 +1,72 @@
-# Simulador de Acordo APS — Engenheiros
+# Cálculos Eng — Simulador de Acordo APS
 
-Aplicação web estática para simular acordos em que a **Autoridade Portuária de Santos (APS) é a pagadora**, usando como referência os percentuais da Política de Assuntos Jurídicos para deságio sobre juros.
+Aplicação web estática para comparar propostas de acordo dos engenheiros da Autoridade Portuária de Santos (APS), usando **cinco campos da primeira página do cálculo Blanco**. Os valores são processados apenas no navegador.
 
-## Regras implementadas
+## Proposta principal: pagamento à vista
 
-- **1 parcela (à vista): 70%** de deságio sobre juros.
-- **2 a 12 parcelas: 50%** de deságio sobre juros.
-- **13 a 24 parcelas: 30%** de deságio sobre juros.
-- O parcelamento mantém aviso sobre a condição de vencimento da primeira parcela prevista na norma.
-- **Módulo alternativo de desconto sobre o valor global:** 15%, 30% ou 50% aplicados ao crédito bruto original, mantido separado do deságio sobre juros.
+- **20% de deságio global** sobre o crédito bruto do reclamante, incluindo verbas + FGTS.
+- **14% de honorários contratuais** sobre o crédito **bruto remanescente após o deságio**, incluindo verbas + FGTS.
+- Os honorários contratuais são abatidos **integralmente do crédito bancário**; a parte calculada sobre FGTS também é descontada do dinheiro depositado diretamente.
+- O **FGTS após o deságio** é mostrado separadamente, para a **conta vinculada do FGTS**. Não é presumido saque livre ou recebimento na conta corrente.
+- O resumo exibe: **valor a cair na conta bancária**, **FGTS**, **total econômico líquido**, **percentual efetivamente recebido do bruto original**, **honorários** e **deságio da APS**.
 
-## Entrada de dados
+Com 20% de deságio e 14% de honorários, a retenção **teórica bruta** é `80% × 86% = 68,8%` do valor original. O percentual líquido real da simulação pode ser menor, porque o campo "Líquido Devido ao Reclamante" já incorpora descontos do cálculo-fonte (como IRPF).
 
-A interface foi deliberadamente reduzida a **cinco valores da primeira página do cálculo Blanco**, usando o texto do próprio documento para diminuir erro de preenchimento:
+## Cinco valores copiados do Blanco
 
-1. `“Total” → coluna “Valor Corrigido”` — quadro **Resumo do Cálculo**, última linha `Total`.
-2. `“Total” → coluna “Juros”` — quadro **Resumo do Cálculo**, última linha `Total`.
-3. `“FGTS 8%” → coluna “Valor Corrigido”` — quadro **Resumo do Cálculo**, linha `FGTS 8%`.
-4. `“FGTS 8%” → coluna “Juros”` — quadro **Resumo do Cálculo**, linha `FGTS 8%`.
-5. `“Líquido Devido ao Reclamante”` — quadro **Descrição de Créditos e Descontos do Reclamante**, última linha.
+1. "Total" → "Valor Corrigido" (quadro Resumo do Cálculo).
+2. "Total" → "Juros" (quadro Resumo do Cálculo).
+3. "FGTS 8%" → "Valor Corrigido".
+4. "FGTS 8%" → "Juros".
+5. "Líquido Devido ao Reclamante" (quadro Descrição de Créditos e Descontos do Reclamante).
 
-Não é necessário digitar bruto devido, depósito de FGTS, IRPF, contribuição social ou honorários.
+Não copiar o **Total Devido pelo Reclamado** nem os honorários de sucumbência para a base contratual: o total do reclamado também inclui encargos patronais e/ou rubricas de outros credores, fora do crédito bruto do reclamante.
 
-## Lógica da simulação
-
-```text
-Juros diretos = Juros totais − Juros do FGTS
-Deságio direto = Juros diretos × percentual da faixa
-Deságio FGTS = Juros do FGTS × percentual da faixa
-Deságio total = Deságio direto + Deságio FGTS
-
-Bruto original do crédito = Valor Corrigido + Juros
-Bruto após deságio = Bruto original − Deságio total
-
-Recebimento direto estimado = Líquido original − Deságio direto
-FGTS após deságio = FGTS corrigido + Juros do FGTS − Deságio FGTS
-Total econômico = Recebimento direto estimado + FGTS após deságio
-Parcela média = Recebimento direto estimado ÷ número de parcelas
-```
-
-O simulador preserva os demais descontos já refletidos no **Líquido Devido ao Reclamante** e não recalcula IRPF, contribuição previdenciária ou outros encargos.
-
-
-## Módulo alternativo — desconto sobre o valor global
-
-Além das regras de deságio **sobre juros**, o simulador possui um bloco independente para testar propostas com desconto de **15%, 30% ou 50% sobre o valor global**.
-
-Os dois métodos são apresentados separadamente e **não são cumulativos**.
+## Memória de cálculo — cenário global
 
 ```text
-Crédito bruto original = Valor Corrigido + Juros
-Desconto global = Crédito bruto original × percentual global
-Crédito bruto após desconto = Crédito bruto original × (1 − percentual global)
+Bruto original = Total Valor Corrigido + Total Juros
+FGTS original = FGTS Valor Corrigido + FGTS Juros
 
-Líquido direto estimado antes do advogado = Líquido original × (1 − percentual global)
-Honorários contratuais = Líquido direto estimado × percentual do advogado
-Líquido final = Líquido direto estimado − honorários
+Deságio da APS = 20% × Bruto original
+Crédito bruto do acordo = Bruto original − Deságio da APS
+FGTS após deságio = FGTS original × 80%
+Líquido direto estimado antes do advogado = Líquido original × 80%
 
-FGTS estimado após desconto = (FGTS corrigido + Juros do FGTS) × (1 − percentual global)
-Total econômico estimado = Líquido final + FGTS estimado após desconto
+Base dos honorários = Crédito bruto do acordo (verbas brutas + FGTS)
+Honorários = 14% × Base dos honorários
+Honorários correspondentes ao FGTS = 14% × FGTS após deságio
+
+Na conta bancária = Líquido direto após deságio − TODOS os honorários
+FGTS vinculado = FGTS após deságio (não subtrair honorários novamente)
+Total econômico líquido = Na conta bancária + FGTS vinculado
+Percentual recebido = Total econômico líquido ÷ Bruto original
 ```
 
-A distribuição proporcional sobre o líquido e o FGTS é uma **estimativa de apoio à decisão**. Este módulo não recalcula IRPF, contribuição previdenciária ou outros encargos; a base efetiva do acordo deve ser conferida no termo ou proposta concreta.
+Para preservar consistência, o motor usa arredondamento em centavos a cada etapa. Se o crédito bancário for insuficiente para pagar os honorários, o simulador zera o depósito bancário, mostra o saldo pendente e o abate do total econômico.
 
-## Interface
+**Atenção:** a proporcionalização do líquido do Blanco mantém os descontos já refletidos na planilha original. **Não é recálculo tributário**: IRPF, contribuição previdenciária, retenções, eventual quitação de FGTS ou ajustes próprios do termo do acordo precisam ser confirmados na liquidação. Os percentuais do deságio e do advogado podem ser alterados na interface, mas começam em **20%** e **14%**.
 
-A UI segue uma direção de “planilha técnica transformada em instrumento digital”:
+## Módulos preservados (não cumulativos)
 
-- rótulos idênticos aos do cálculo-fonte;
-- indicação explícita de onde localizar cada número;
-- painel de resultado sempre associado aos dados de entrada;
-- comparação entre 1x, 12x, 13x, 14x e 24x;
-- valor presente opcional por taxa anual de referência;
-- memória de cálculo expansível;
-- layout responsivo e navegação por teclado;
-- dados processados somente no navegador.
+O simulador também mantém o modelo alternativo de **deságio somente sobre juros**:
 
-## Executar
+- 1 parcela: 70% sobre juros;
+- 2 a 12 parcelas: 50% sobre juros;
+- 13 a 24 parcelas: 30% sobre juros.
 
-É uma aplicação estática. Basta abrir `index.html` ou publicar a raiz do repositório em uma hospedagem estática.
+Esse modelo permanece independente do desconto global. Os honorários contratuais em **todos** os comparativos incidem sobre o crédito bruto após o deságio, incluindo FGTS, e são pagos com as verbas diretas. Também permanecem disponíveis a comparação entre 1 a 24 parcelas, valor presente, análise de aplicações em renda fixa e memória de cálculo.
 
-## Aviso
+O módulo global permite testar 15%, 20%, 30%, 50% ou uma taxa digitada entre 0% e 100%. O desconto global não é somado ao deságio sobre juros.
 
-Ferramenta de simulação. O valor efetivamente acordado depende da redação do termo, homologação, atualização até a data do pagamento e tratamento tributário/previdenciário aplicável ao caso concreto.
+## Execução e verificação
+
+Aplicação estática: abra `index.html` ou publique a raiz do repositório em hospedagem estática. Não há necessidade de servidor de API, login ou banco de dados.
+
+Requer Node.js 22+ somente para executar os testes:
+
+```bash
+node --test tests/*.test.cjs
+```
+
+Os testes automáticos cobrem arredondamento monetário, honorários sobre FGTS, depósito bancário, percentuais, tratamento de saldo pendente, comparação não cumulativa e integração entre os módulos da interface.

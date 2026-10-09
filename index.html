@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cálculos Eng · Simulador de Acordo APS</title>
-  <meta name="description" content="Simulador de deságio e parcelamento APS a partir da primeira página do cálculo Blanco." />
+  <title>Cálculos Eng · Acordo global à vista APS</title>
+  <meta name="description" content="Simulador de acordo à vista com deságio global, honorários sobre verbas e FGTS e separação do crédito bancário." />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="enhancements.css" />
   <link rel="stylesheet" href="investment.css" />
@@ -32,9 +32,9 @@
     <section class="intro" aria-labelledby="page-title">
       <div>
         <p class="eyebrow">Liquidação trabalhista · apoio à decisão</p>
-        <h1 id="page-title">Preencha somente 5 valores da 1ª página do Blanco.</h1>
+        <h1 id="page-title">Acordo à vista: veja o valor na conta e no FGTS.</h1>
       </div>
-      <p class="intro__copy">Os rótulos abaixo repetem o texto do cálculo e indicam exatamente onde localizar cada número. Depois, escolha o parcelamento e aplique o desconto contratual do advogado para ver quanto efetivamente sobra.</p>
+      <p class="intro__copy">Informe os cinco valores da página 1 do cálculo Blanco. O cenário principal já considera 20% de deságio global, pagamento à vista e honorários de 14% sobre verbas e FGTS. As simulações antigas sobre juros permanecem como comparativo.</p>
     </section>
 
     <div class="workspace">
@@ -141,14 +141,14 @@
           <div class="sheet-section__heading">
             <div class="step-index" aria-hidden="true">03</div>
             <div>
-              <p class="section-source">Condições do acordo</p>
-              <h3 id="condicoes-title">Escolha a forma de recebimento</h3>
+              <p class="section-source">Comparação alternativa · desconto apenas nos juros</p>
+              <h3 id="condicoes-title">Simule também os critérios antigos</h3>
             </div>
           </div>
 
           <div class="condition-grid">
             <div>
-              <label class="control-label" for="parcelas">Número de parcelas</label>
+              <label class="control-label" for="parcelas">Parcelas no comparativo sobre juros</label>
               <select id="parcelas"></select>
               <div id="scenarioQuick" class="quick-scenarios" aria-label="Atalhos de parcelamento">
                 <button type="button" data-parcelas="1">À vista</button>
@@ -171,7 +171,7 @@
             <div class="lawyer-fee__copy">
               <p class="section-source">Dedução contratual</p>
               <strong>Desconto do advogado</strong>
-              <small>Percentual aplicado sobre o recebimento direto depois do deságio da APS. O padrão é 14%. O FGTS separado não entra nesta base.</small>
+              <small>Padrão de 14% sobre o crédito <b>bruto após o deságio</b>, incluindo verbas e FGTS. Os honorários integrais são descontados do pagamento direto; o FGTS permanece na conta vinculada.</small>
             </div>
             <div class="lawyer-fee__control">
               <label class="control-label" for="advogadoPct">Percentual do advogado</label>
@@ -193,7 +193,7 @@
             <div class="company-discount-summary__copy">
               <p class="section-source">Resumo do efeito do acordo</p>
               <strong>Deságio global estimado da APS</strong>
-              <small>Antes do desconto do advogado. Mede a redução total concedida à empresa em relação ao crédito bruto original do cálculo (Valor Corrigido + Juros).</small>
+              <small>Indicador exclusivo da modalidade alternativa sobre juros. A proposta principal de 20% sobre o crédito global é mostrada no painel à direita.</small>
             </div>
             <div class="company-discount-summary__value">
               <strong id="globalDiscountPct">—</strong>
@@ -211,13 +211,34 @@
       </section>
 
       <aside class="result-panel" aria-labelledby="result-title">
+        <section class="agreed-summary" aria-label="Resultado principal da proposta à vista">
+          <div class="agreed-summary__heading">
+            <p class="result-kicker">Acordo definido · pagamento à vista</p>
+            <strong id="mainSettlementBadge">À vista · deságio global de 20% · advogado 14%</strong>
+          </div>
+          <div class="agreed-summary__hero">
+            <span>Quanto será creditado na conta bancária</span>
+            <strong id="settlementBank">—</strong>
+          </div>
+          <div class="agreed-summary__grid">
+            <div><span>Depósito separado no FGTS</span><strong id="settlementFgts">—</strong></div>
+            <div><span>Total econômico líquido: conta + FGTS</span><strong id="settlementTotal">—</strong></div>
+            <div><span>Percentual efetivamente recebido do bruto original</span><strong id="settlementPct">—</strong></div>
+            <div><span>Percentual teórico antes dos tributos</span><strong id="settlementTheoreticalPct">—</strong></div>
+            <div><span>Deságio global da APS</span><strong id="settlementGlobalDiscount">—</strong></div>
+            <div><span>Honorários do advogado (verbas + FGTS)</span><strong id="settlementFee">—</strong></div>
+          </div>
+          <p class="agreed-summary__note">O FGTS é separado para a conta vinculada, não para a conta bancária. A parcela dos honorários calculada sobre FGTS também é abatida das verbas pagas diretamente. O saque do FGTS depende das hipóteses legais.</p>
+        </section>
+        <details class="legacy-results">
+          <summary>Ver resultado alternativo: deságio somente sobre juros</summary>
         <div class="result-panel__topline">
           <p class="result-kicker">Cenário selecionado</p>
           <span id="ruleBadge" class="rule-badge">Aguardando preenchimento</span>
         </div>
 
         <div class="result-main">
-          <span id="result-title">Líquido final após advogado</span>
+          <span id="result-title">Valor na conta · comparação por deságio sobre juros</span>
           <strong id="liquido">—</strong>
           <div class="result-main__comparison">
             <span>Após deságio, antes do advogado</span>
@@ -239,7 +260,7 @@
             <strong id="honorariosAdvogado">—</strong>
           </div>
           <div>
-            <span>FGTS separado</span>
+            <span>FGTS vinculado (critério sobre juros)</span>
             <strong id="fgtsFinal">—</strong>
           </div>
           <div>
@@ -251,7 +272,7 @@
             <strong id="brutoAcordo">—</strong>
           </div>
           <div class="result-ledger__wide">
-            <span>Total econômico final · líquido + FGTS</span>
+            <span>Total econômico alternativo · conta + FGTS</span>
             <strong id="totalEconomico">—</strong>
           </div>
           <div class="result-ledger__wide result-ledger__muted">
@@ -260,18 +281,92 @@
           </div>
         </div>
 
+        </details>
         <button id="printBtn" class="print-button" type="button">Imprimir resumo</button>
-        <p class="result-disclaimer">O desconto do advogado é tratado como honorário contratual sobre o recebimento direto após o deságio da APS. Simulação indicativa.</p>
+        <p class="result-disclaimer">Neste comparativo alternativo, os 14% também abrangem verbas e FGTS após o deságio sobre juros. Valores indicativos; a proposta global à vista é o resultado principal.</p>
       </aside>
     </div>
+
+    <section class="global-discount-analysis" aria-labelledby="global-discount-title">
+      <div class="global-discount-analysis__header">
+        <div>
+          <p class="eyebrow">Proposta definida · à vista</p>
+          <h2 id="global-discount-title">Acordo global: 20% de deságio + 14% de honorários</h2>
+        </div>
+        <p>O pagamento é à vista. Primeiro descontam-se 20% do crédito bruto (verbas + FGTS); depois, 14% de honorários sobre a base bruta remanescente, inclusive FGTS. Os percentuais podem ser alterados para comparação, sem cumular o deságio sobre juros.</p>
+      </div>
+
+      <div class="global-discount-control">
+        <div>
+          <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
+          <div class="percent-input global-discount-rate-input">
+            <input id="globalBaseDiscountRate" inputmode="decimal" value="20,00" autocomplete="off" aria-describedby="globalBaseDiscountHelp" />
+            <span>%</span>
+          </div>
+          <small id="globalBaseDiscountHelp" class="control-help">Digite qualquer percentual entre 0% e 100% ou use um dos atalhos abaixo.</small>
+          <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
+            <button type="button" data-global-rate="15">15%</button>
+            <button type="button" data-global-rate="20">20%</button>
+            <button type="button" data-global-rate="30">30%</button>
+            <button type="button" data-global-rate="50">50%</button>
+          </div>
+        </div>
+        <p class="global-discount-control__explanation"><strong>Base contratual:</strong> verbas brutas e FGTS após o deságio global. Os honorários são pagos integralmente a partir do crédito bancário, inclusive sua parcela referente ao FGTS. O valor proporcional do FGTS segue separado para a conta vinculada. A estimativa preserva os descontos já incorporados ao líquido informado no Blanco, sem recalcular os tributos.</p>
+      </div>
+
+      <div class="global-discount-summary" aria-live="polite">
+        <div><span>Deságio global aplicado</span><strong id="wholeGlobalRate">—</strong></div>
+        <div><span>Deságio global em reais</span><strong id="wholeGlobalDiscountAmount">—</strong></div>
+        <div><span>Crédito bruto após deságio</span><strong id="wholeGlobalGrossAfter">—</strong></div>
+        <div><span>Verbas brutas após deságio (sem FGTS)</span><strong id="wholeGlobalGrossVerbas">—</strong></div>
+        <div><span>Base dos honorários (verbas + FGTS)</span><strong id="wholeGlobalLawyerBase">—</strong></div>
+        <div><span>Honorários atribuíveis às verbas</span><strong id="wholeGlobalLawyerVerbas">—</strong></div>
+        <div><span>Honorários atribuíveis ao FGTS</span><strong id="wholeGlobalLawyerFgts">—</strong></div>
+        <div><span>Honorários totais descontados do crédito direto</span><strong id="wholeGlobalLawyer">—</strong></div>
+        <div><span>Recebimento direto antes dos honorários (estimado)</span><strong id="wholeGlobalPreLawyer">—</strong></div>
+        <div><span>Descontos originais proporcionalizados (não é IR recalculado)</span><strong id="wholeGlobalTaxEstimate">—</strong></div>
+        <div class="global-discount-summary__primary"><span>Crédito à vista na conta bancária</span><strong id="wholeGlobalNet">—</strong></div>
+        <div class="global-discount-summary__primary"><span>FGTS para a conta vinculada</span><strong id="wholeGlobalFgts">—</strong></div>
+        <div class="global-discount-summary__primary"><span>Valor econômico líquido (conta + FGTS)</span><strong id="wholeGlobalEconomic">—</strong></div>
+        <div class="global-discount-summary__primary"><span>Percentual efetivamente recebido do bruto original</span><strong id="wholeGlobalPct">—</strong></div>
+        <div><span>Percentual teórico antes dos tributos</span><strong id="wholeGlobalTheoreticalPct">—</strong></div>
+      </div>
+      <p id="wholeGlobalWarning" class="global-discount-warning" role="status" aria-live="polite"></p>
+
+      <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Desconto global</th>
+              <th>Deságio em R$</th>
+              <th>Bruto após deságio</th>
+              <th>Honorários (incl. FGTS)</th>
+              <th>Na conta bancária</th>
+              <th>FGTS vinculado</th>
+              <th>Total recebido</th>
+              <th>% do bruto original</th>
+            </tr>
+          </thead>
+          <tbody id="wholeGlobalCompareBody">
+            <tr><td colspan="8" class="empty-row">Preencha os cinco valores do Blanco para comparar os descontos globais.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="global-discount-note">Premissa: deságio sobre o crédito bruto (verbas + FGTS), honorários sobre o bruto remanescente, inclusive FGTS, pagos com o crédito direto. O FGTS não é automaticamente sacável. O líquido informado no Blanco já traz descontos, como IRPF; aqui eles são mantidos proporcionalmente, não recalculados. O valor final pode variar na liquidação e deve ser confirmado com a redação do acordo.</p>
+      <details class="global-calculation-memory calculation-memory">
+        <summary><span><small>Transparência da proposta à vista</small><strong>Ver memória do deságio global e honorários</strong></span><span aria-hidden="true">+</span></summary>
+        <div id="wholeGlobalMemory" class="memory-grid"></div>
+      </details>
+    </section>
 
     <section class="comparison" aria-labelledby="comparison-title">
       <div class="section-headline">
         <div>
-          <p class="eyebrow">Comparação de cenários</p>
-          <h2 id="comparison-title">Veja quanto sobra em cada modalidade</h2>
+          <p class="eyebrow">Módulo alternativo mantido</p>
+          <h2 id="comparison-title">Comparação por desconto somente sobre juros</h2>
         </div>
-        <p>O percentual do advogado é aplicado igualmente em todos os cenários para permitir comparação direta.</p>
+        <p>Os honorários incidem sobre o crédito bruto após o deságio de juros, incluindo FGTS. Estes cenários não se acumulam com o acordo global de 20%.</p>
       </div>
 
       <div class="table-shell">
@@ -294,89 +389,6 @@
       </div>
     </section>
 
-
-    <section class="global-discount-analysis" aria-labelledby="global-discount-title">
-      <div class="global-discount-analysis__header">
-        <div>
-          <p class="eyebrow">Cenário alternativo · base global</p>
-          <h2 id="global-discount-title">Desconto sobre o valor global do crédito</h2>
-        </div>
-        <p>Este módulo é separado do cálculo de deságio sobre juros. Ele simula uma proposta em que qualquer percentual entre 0% e 100% é descontado de todo o crédito bruto original (Valor Corrigido + Juros), sem acumular os dois tipos de deságio.</p>
-      </div>
-
-      <div class="global-discount-control">
-        <div>
-          <label class="control-label" for="globalBaseDiscountRate">Percentual de desconto sobre o valor global</label>
-          <div class="percent-input global-discount-rate-input">
-            <input id="globalBaseDiscountRate" inputmode="decimal" value="30,00" autocomplete="off" aria-describedby="globalBaseDiscountHelp" />
-            <span>%</span>
-          </div>
-          <small id="globalBaseDiscountHelp" class="control-help">Digite qualquer percentual entre 0% e 100% ou use um dos atalhos abaixo.</small>
-          <div id="globalDiscountQuick" class="global-discount-quick" aria-label="Atalhos de desconto sobre o valor global">
-            <button type="button" data-global-rate="15">15%</button>
-            <button type="button" data-global-rate="30">30%</button>
-            <button type="button" data-global-rate="50">50%</button>
-          </div>
-        </div>
-        <p class="global-discount-control__explanation"><strong>Importante:</strong> esta é uma metodologia alternativa. O percentual escolhido aqui não é somado ao deságio sobre juros do módulo anterior. Para estimar o líquido e o FGTS, o sistema aplica proporcionalmente o mesmo fator de pagamento ao líquido original e ao FGTS separado.</p>
-      </div>
-
-      <div class="global-discount-summary" aria-live="polite">
-        <div>
-          <span>Desconto global selecionado</span>
-          <strong id="wholeGlobalRate">—</strong>
-        </div>
-        <div>
-          <span>Deságio global em reais</span>
-          <strong id="wholeGlobalDiscountAmount">—</strong>
-        </div>
-        <div>
-          <span>Crédito bruto após desconto</span>
-          <strong id="wholeGlobalGrossAfter">—</strong>
-        </div>
-        <div>
-          <span>Direto antes do advogado</span>
-          <strong id="wholeGlobalPreLawyer">—</strong>
-        </div>
-        <div>
-          <span>Honorários do advogado</span>
-          <strong id="wholeGlobalLawyer">—</strong>
-        </div>
-        <div class="global-discount-summary__primary">
-          <span>Líquido final após advogado</span>
-          <strong id="wholeGlobalNet">—</strong>
-        </div>
-        <div>
-          <span>FGTS estimado após desconto</span>
-          <strong id="wholeGlobalFgts">—</strong>
-        </div>
-        <div class="global-discount-summary__primary">
-          <span>Total econômico final · líquido + FGTS</span>
-          <strong id="wholeGlobalEconomic">—</strong>
-        </div>
-      </div>
-
-      <div class="table-shell">
-        <table>
-          <thead>
-            <tr>
-              <th>Desconto global</th>
-              <th>APS paga</th>
-              <th>Redução do bruto</th>
-              <th>Bruto após desconto</th>
-              <th>Advogado</th>
-              <th>Líquido final</th>
-              <th>Total econômico</th>
-            </tr>
-          </thead>
-          <tbody id="wholeGlobalCompareBody">
-            <tr><td colspan="7" class="empty-row">Preencha os cinco valores do Blanco para comparar os descontos sobre o valor global.</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="global-discount-note">Premissa deste módulo: o desconto global é aplicado ao crédito bruto original. Para apresentar uma estimativa do que sobra ao reclamante, o mesmo percentual é aplicado proporcionalmente ao “Líquido Devido ao Reclamante” e ao FGTS original. IRPF, contribuição previdenciária e demais encargos não são recalculados; confirme a base efetiva do acordo antes de usar o resultado como valor de liquidação.</p>
-    </section>
 
     <details class="calculation-memory">
       <summary>
@@ -471,6 +483,7 @@
     <span>Os dados permanecem no seu navegador.</span>
   </footer>
 
+  <script src="settlement-core.js"></script>
   <script src="app.js"></script>
   <script src="global-discount.js"></script>
   <script src="investment.js"></script>
