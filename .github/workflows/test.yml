@@ -1,0 +1,24 @@
+name: Verificar calculos do acordo
+
+on:
+  push:
+    branches: [main, "fix/acordo-global-20-honorarios-fgts"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sintaxe dos scripts
+        run: |
+          node --check settlement-core.js
+          node --check app.js
+          node --check global-discount.js
+          node --check investment.js
+      - name: Testes financeiros e de interface
+        run: node --test tests/*.test.cjs

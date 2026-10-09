@@ -73,30 +73,19 @@ function isComplete() {
 
 function simulate(base, parcelas) {
   const rule = getRule(parcelas);
+  const agreement = window.CalculosEngCalc.simularAcordo(base, rule.rate, 'juros');
   const jurosDiretos = Math.max(0, base.juros - base.fgtsJuros);
-  const desagioDireto = jurosDiretos * rule.rate;
-  const desagioFGTS = base.fgtsJuros * rule.rate;
-  const desagioTotal = desagioDireto + desagioFGTS;
-
-  const brutoOriginal = base.valorCorrigido + base.juros;
-  const brutoAcordo = Math.max(0, brutoOriginal - desagioTotal);
-  const desagioGlobalPct = brutoOriginal > 0 ? desagioTotal / brutoOriginal : 0;
-  const empresaPagaPct = brutoOriginal > 0 ? brutoAcordo / brutoOriginal : 0;
-
-  const liquidoAntesAdvogado = Math.max(0, base.liquidoOriginal - desagioDireto);
-  const honorariosAdvogado = liquidoAntesAdvogado * base.advogadoPct;
-  const liquidoFinal = Math.max(0, liquidoAntesAdvogado - honorariosAdvogado);
-
-  const fgtsOriginal = base.fgtsCorrigido + base.fgtsJuros;
-  const fgtsFinal = Math.max(0, fgtsOriginal - desagioFGTS);
-  const totalEconomico = liquidoFinal + fgtsFinal;
-  const parcelaMedia = parcelas > 0 ? liquidoFinal / parcelas : 0;
+  const desagioGlobalPct = agreement.brutoOriginal > 0
+    ? agreement.desagioTotal / agreement.brutoOriginal : 0;
+  const empresaPagaPct = agreement.brutoOriginal > 0
+    ? agreement.brutoAcordo / agreement.brutoOriginal : 0;
+  const parcelaMedia = parcelas > 0 ? agreement.valorEmConta / parcelas : 0;
 
   const taxaMensal = base.taxaAnual > -1
     ? Math.pow(1 + base.taxaAnual, 1 / 12) - 1
     : 0;
 
-  let valorPresente = liquidoFinal;
+  let valorPresente = agreement.valorEmConta;
   if (parcelas > 1 && taxaMensal > 0) {
     valorPresente = 0;
     for (let i = 1; i <= parcelas; i += 1) {
@@ -105,22 +94,12 @@ function simulate(base, parcelas) {
   }
 
   return {
+    ...agreement,
     parcelas,
     ...rule,
     jurosDiretos,
-    desagioDireto,
-    desagioFGTS,
-    desagioTotal,
-    brutoOriginal,
-    brutoAcordo,
     desagioGlobalPct,
     empresaPagaPct,
-    liquidoAntesAdvogado,
-    honorariosAdvogado,
-    liquidoFinal,
-    fgtsOriginal,
-    fgtsFinal,
-    totalEconomico,
     parcelaMedia,
     valorPresente
   };
@@ -141,6 +120,14 @@ function renderValidation(base) {
   }
 
   const warnings = [];
+  if (base.liquidoOriginal < 0 || base.valorCorrigido < 0 ||
+      base.juros < 0 || base.fgtsCorrigido < 0 || base.fgtsJuros < 0) {
+    warnings.push('Valores monetários negativos não são admitidos.');
+  }
+  if (base.fgtsCorrigido + base.fgtsJuros + base.liquidoOriginal >
+      base.valorCorrigido + base.juros + 0.01) {
+    warnings.push('FGTS + líquido do reclamante supera o bruto original. Confira a digitação.');
+  }
   if (base.fgtsJuros > base.juros) {
     warnings.push('Os juros do FGTS estão maiores que os juros totais. Confira os dois campos.');
   }
@@ -158,7 +145,7 @@ function renderValidation(base) {
   }
 
   box.className = 'validation validation--success';
-  box.innerHTML = `<strong>Dados completos.</strong> A comparação já considera ${pct(base.advogadoPct)} de desconto do advogado.`;
+  box.innerHTML = `<strong>Dados completos.</strong> A comparação considera ${pct(base.advogadoPct)} de honorários sobre o bruto após deságio, incluindo o FGTS.`;
 }
 
 function clearResults() {
@@ -204,8 +191,20 @@ function render() {
     return;
   }
 
+  const invalid = base.fgtsJuros > base.juros ||
+    base.fgtsCorrigido > base.valorCorrigido ||
+    base.fgtsCorrigido + base.fgtsJuros + base.liquidoOriginal >
+      base.valorCorrigido + base.juros + 0.01 ||
+    [base.valorCorrigido, base.juros, base.fgtsCorrigido,
+      base.fgtsJuros, base.liquidoOriginal].some((v) => v < 0);
+  if (invalid) {
+    $('ruleBadge').textContent = 'Confira os valores informados';
+    clearResults();
+    return;
+  }
+
   const result = simulate(base, base.parcelas);
-  $('ruleBadge').textContent = `${result.label} · advogado ${pct(base.advogadoPct)}`;
+  $('ruleBadge').textContent = `${result.label} · honorários ${pct(base.advogadoPct)} (incluem FGTS)`;
   $('liquido').textContent = fmt(result.liquidoFinal);
   $('preLawyerValue').textContent = fmt(result.liquidoAntesAdvogado);
   $('originalValue').textContent = fmt(base.liquidoOriginal);
@@ -247,9 +246,11 @@ function render() {
     [`Deságio APS no FGTS (${pct(result.rate)})`, result.desagioFGTS],
     ['Deságio APS total', result.desagioTotal],
     ['Recebimento direto após deságio e antes do advogado', result.liquidoAntesAdvogado],
+    ['Base dos honorários (verbas + FGTS, após o deságio)', result.baseHonorarios],
+    ['Honorários referentes ao FGTS cobrados do crédito direto', result.honorariosSobreFGTS],
     [`Honorários contratuais do advogado (${pct(base.advogadoPct)})`, result.honorariosAdvogado],
-    ['Líquido final após advogado', result.liquidoFinal],
-    ['FGTS após deságio', result.fgtsFinal],
+    ['Crédito líquido na conta bancária após advogado', result.liquidoFinal],
+    ['FGTS na conta vinculada após deságio', result.fgtsFinal],
     ['Total econômico final (líquido + FGTS)', result.totalEconomico],
     ['Bruto do crédito após deságio', result.brutoAcordo]
   ];
@@ -261,7 +262,7 @@ function render() {
 
 function initParcelas() {
   $('parcelas').innerHTML = Array.from({ length: 24 }, (_, i) => i + 1)
-    .map((n) => `<option value="${n}" ${n === 12 ? 'selected' : ''}>${n === 1 ? '1 — à vista' : `${n} parcelas`}</option>`)
+    .map((n) => `<option value="${n}" ${n === 1 ? 'selected' : ''}>${n === 1 ? '1 — à vista' : `${n} parcelas`}</option>`)
     .join('');
 }
 

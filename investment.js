@@ -74,11 +74,8 @@
 
   function simulate(base, parcelas) {
     const rate = ruleFor(parcelas);
-    const jurosDiretos = Math.max(0, base.juros - base.fgtsJuros);
-    const desagioDireto = jurosDiretos * rate;
-    const liquidoAntesAdvogado = Math.max(0, base.liquidoOriginal - desagioDireto);
-    const honorariosAdvogado = liquidoAntesAdvogado * base.advogadoPct;
-    const liquidoFinal = Math.max(0, liquidoAntesAdvogado - honorariosAdvogado);
+    const result = window.CalculosEngCalc.simularAcordo(base, rate, 'juros');
+    const liquidoFinal = result.valorEmConta;
     const parcelaLiquida = parcelas > 0 ? liquidoFinal / parcelas : 0;
 
     return {
@@ -86,7 +83,7 @@
       rate,
       liquidoFinal,
       parcelaLiquida,
-      honorariosAdvogado
+      honorariosAdvogado: result.honorariosAdvogado
     };
   }
 
@@ -173,6 +170,13 @@
     }
 
     const base = readBase();
+    try {
+      window.CalculosEngCalc.simularAcordo(base, 0.70, 'juros');
+    } catch (error) {
+      clearAnalysis();
+      el('investmentSelectedVerdict').textContent = 'Confira os cinco valores do Blanco antes de comparar.';
+      return;
+    }
     const all = Array.from({ length: 24 }, (_, i) => futureOutcome(base, i + 1));
     const ranked = [...all].sort((a, b) => b.patrimonioFinal - a.patrimonioFinal);
     const best = ranked[0];
